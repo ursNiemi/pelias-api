@@ -52,6 +52,13 @@ function assignValidLibpostalParsing(parsedText, fromLibpostal, text) {
     parsedText.number = fromLibpostal.number;
   }
 
+  const query = fromLibpostal.query;
+  if(query) {
+    if(!parsedText.name) {
+      parsedText.name = query;
+    }
+  }
+
   const street = fromLibpostal.street;
   if(street) {
     if((!parsedText.name || parsedText.name===street) && !parsedText.number) {
