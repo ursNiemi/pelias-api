@@ -12,7 +12,6 @@ DOCKER_IMAGE_COMMIT=$DOCKER_IMAGE:$DOCKER_TAG
 DOCKER_IMAGE_LATEST=$DOCKER_IMAGE:latest
 DOCKER_IMAGE_PROD=$DOCKER_IMAGE:prod
 
-
 if [ -z $TRAVIS_TAG ]; then
     # Build image
     echo "Building pelias-api"
