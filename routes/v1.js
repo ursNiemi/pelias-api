@@ -274,7 +274,7 @@ function addRoutes(app, peliasConfig) {
       postProc.confidenceScores(peliasConfig.api),
       postProc.matchLanguage(peliasConfig.api),
       postProc.interpolate(interpolationService, interpolationShouldExecute),
-      postProc.sortResponseData(require('pelias-sorting'), hasAdminOnlyResults),
+//      postProc.sortResponseData(require('pelias-sorting'), hasAdminOnlyResults),
       postProc.dedupe(),
       postProc.accuracy(),
       postProc.translate(),
