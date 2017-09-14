@@ -22,15 +22,15 @@ if (api && api.localization) {
   filteredRegions = api.localization.filteredRegions;
   cleanRegions = api.localization.cleanRegions;
   if(api.localization.postalCodeValidator) {
-    var regexp = new RegExp(api.localization.postalCodeValidator);
+    var postalRegexp = new RegExp(api.localization.postalCodeValidator);
     postalCodeValidator = function(code) {
-      return regexp.test(code);
+      return postalRegexp.test(code);
     };
   }
   if(api.localization.streetNumberValidator) {
-    var regexp = new RegExp(api.localization.streetNumberValidator);
+    var streetNRegexp = new RegExp(api.localization.streetNumberValidator);
     streetNumberValidator = function(code) {
-      return regexp.test(code);
+      return streetNRegexp.test(code);
     };
   }
 }
