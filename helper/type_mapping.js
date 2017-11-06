@@ -47,15 +47,15 @@ var SOURCE_MAPPING = addStandardTargetsToAliases(SOURCES, SOURCE_ALIASES);
  * not going to match any records and will return no results.
  */
 var LAYERS_BY_SOURCE = {
- openstreetmap: [ 'address', 'venue', 'street' ],
+ openstreetmap: [ 'address', 'venue', 'street', 'station' ],
  openaddresses: [ 'address' ],
  geonames: [ 'country','macroregion', 'region', 'county','localadmin',
   'locality','borough', 'neighbourhood', 'venue' ],
  whosonfirst: [ 'continent', 'country', 'dependency', 'macroregion', 'region',
    'locality', 'localadmin', 'macrocounty', 'county', 'macrohood', 'borough',
    'neighbourhood', 'microhood', 'disputed', 'venue', 'postalcode'],
-  nlsfi: [ 'venue', 'stop', 'station' ],
-  gtfs: [ 'stop', 'station' ]
+ nlsfi: [ 'venue', 'stop', 'station' ],
+ gtfs: [ 'stop', 'station' ]
 };
 
 /*
