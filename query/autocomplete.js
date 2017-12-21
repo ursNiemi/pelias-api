@@ -60,6 +60,7 @@ query.score( peliasQuery.view.population( views.pop_subquery ) );
 query.filter( peliasQuery.view.sources );
 query.filter( peliasQuery.view.layers );
 query.filter( peliasQuery.view.boundary_rect );
+query.filter( peliasQuery.view.boundary_polygon );
 
 // --------------------------------
 
@@ -138,6 +139,11 @@ function generateQuery( clean ){
       'boundary:rect:left': clean['boundary.rect.min_lon']
     });
     logStr += '[param:boundary_rect] ';
+  }
+
+  if( clean['boundary.polygon']) {
+    vs.var('boundary:polygon', clean['boundary.polygon']);
+    logStr += '[param:boundary_polygon] ';
   }
 
   // run the address parser

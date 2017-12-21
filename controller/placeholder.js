@@ -119,6 +119,22 @@ function getBoundaryRectangleFilter(clean, do_geometric_filters_apply) {
 
 }
 
+// return a function that detects if a result is inside a boundary polygon if available
+function getBoundarypolygonFilter(clean, do_geometric_filters_apply) {
+  if (do_geometric_filters_apply && clean.boundary.polygon ) {
+    const polygon = clean.boundary.polygon.map(function(p) { // convert field names
+      return { latitude: p.lat, longitude: p.lon };
+    });
+    // isPointInside takes polygon last, so create a function that has it pre-populated
+    const isPointInsidePolygon = _.partialRight(geolib.isPointInside, polygon);
+
+    return _.partial(isInsideGeometry, isPointInsidePolygon);
+  }
+
+  // there's no polygon filter, so return a function that always returns true
+  return () => true;
+}
+
 // return a function that detects if a result is inside a circle if a circle is available
 function getBoundaryCircleFilter(clean, do_geometric_filters_apply) {
   // check to see if boundary.circle.lat/lon/radius are all available

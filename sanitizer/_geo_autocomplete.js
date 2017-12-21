@@ -1,6 +1,7 @@
 var geo_common = require ('./_geo_common');
 var LAT_LON_IS_REQUIRED = false;
 var RECT_IS_REQUIRED = false;
+var POLYGON_IS_REQUIRED = false;
 
 // validate inputs, convert types and apply defaults
 function _sanitize( raw, clean ){
@@ -11,6 +12,7 @@ function _sanitize( raw, clean ){
   try {
     geo_common.sanitize_point( 'focus.point', clean, raw, LAT_LON_IS_REQUIRED );
     geo_common.sanitize_rect( 'boundary.rect', clean, raw, RECT_IS_REQUIRED );
+    geo_common.sanitize_point_array( 'boundary.polygon', clean, raw, POLYGON_IS_REQUIRED );
   }
   catch (err) {
     messages.errors.push( err.message );
@@ -26,7 +28,8 @@ function _expected(){
   { name: 'boundary.rect.min_lat' },
   { name: 'boundary.rect.max_lat' },
   { name: 'boundary.rect.min_lon' },
-  { name: 'boundary.rect.max_lon' }];
+  { name: 'boundary.rect.max_lon' },
+  { name: 'boundary.polygon' }];
 }
 
 module.exports = () => ({
