@@ -61,11 +61,15 @@ function assignValidLibpostalParsing(parsedText, fromLibpostal, text) {
 
   const street = fromLibpostal.street;
   if(street) {
-    if((!parsedText.name || parsedText.name===street) && !parsedText.number) {
-      // plain parsed street is suspicious as Libpostal often maps venue name to street
-      // better to search it via name
+    if(!parsedText.name) {
       parsedText.name = street;
-    } else {
+      if(parsedText.number ) {
+        parsedText.name = parsedText.name + ' ' + parsedText.number;
+      }
+    }
+    if(parsedText.number) {
+      // plain parsed street is suspicious as Libpostal often maps venue name to street
+      // better to search it only via name, if no number is parsed
       parsedText.street = street;
     }
   }
