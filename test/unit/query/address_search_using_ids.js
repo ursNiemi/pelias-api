@@ -19,6 +19,7 @@ const views = {
   boundary_country: 'boundary_country view',
   boundary_circle: 'boundary_circle view',
   boundary_rect: 'boundary_rect view',
+  boundary_polygon: 'boundary_polygon view',
   sources: 'sources view'
 };
 
@@ -64,6 +65,7 @@ module.exports.tests.base_query = (test, common) => {
       'boundary_country view',
       'boundary_circle view',
       'boundary_rect view',
+      'boundary_polygon view',
       'sources view'
     ]);
 

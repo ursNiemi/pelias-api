@@ -119,9 +119,54 @@ function sanitize_coord( key, clean, raw, latlon_is_required ) {
   }
 }
 
+
+/**
+ * Parse and validate 2d point array parameter 'lon lat, lon lat, lon lat , ...'
+ *
+ * @param {string} key_prefix
+ * @param {object} clean
+ * @param {object} raw
+ * @param {bool} is_required
+ */
+function sanitize_point_array( key, clean, raw, is_required ) {
+
+  // sanitize the rect property group, this throws an exception if
+  // the group is not complete
+  var present;
+  if (is_required) {
+    present = groups.required(raw, [key]);
+  } else {
+    present = groups.optional(raw, [key]);
+  }
+
+  if (!present) { return; }
+
+  var points = raw[key].split(',').map(function(lon_lat) {
+    var p = lon_lat.split(' ').map(function(val) {
+      var fval = parseFloat( val );
+      if ( _.isFinite( fval ) ) {
+        return fval;
+      } else {
+        throw new Error( util.format( 'Bad float format in boundary polygon \'%s\'', val ) );
+      }
+    });
+    if (p.length === 2) {
+      return { lon: p[0], lat: p[1] };
+    } else {
+      throw new Error( util.format( 'Bad point format in boundary polygon \'%s\'', lon_lat ) );
+    }
+  });
+  if (points.length < 3) {
+    throw new Error( util.format( 'Invalid boundary polygon \'%s\'', raw[key] ) );
+  }
+  clean[key] = points;
+}
+
+
 module.exports = {
   sanitize_rect: sanitize_rect,
   sanitize_coord: sanitize_coord,
   sanitize_circle: sanitize_circle,
-  sanitize_point: sanitize_point
+  sanitize_point: sanitize_point,
+  sanitize_point_array: sanitize_point_array,
 };

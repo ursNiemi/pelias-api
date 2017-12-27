@@ -53,6 +53,7 @@ query.score( peliasQuery.view.admin_multi_match(adminFields, 'peliasAdmin') );
 // non-scoring hard filters
 query.filter( peliasQuery.view.boundary_circle );
 query.filter( peliasQuery.view.boundary_rect );
+query.filter( peliasQuery.view.boundary_polygon );
 query.filter( peliasQuery.view.sources );
 query.filter( peliasQuery.view.layers );
 query.filter( peliasQuery.view.categories );
@@ -135,6 +136,11 @@ function generateQuery( clean ){
       });
     }
     logStr += '[param:boundary_circle] ';
+  }
+
+  if( clean['boundary.polygon']) {
+    vs.var('boundary:polygon', clean['boundary.polygon']);
+    logStr += '[param:boundary_polygon] ';
   }
 
   // boundary country

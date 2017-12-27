@@ -18,6 +18,7 @@ structuredQuery.score( peliasQuery.view.population_only_function );
 structuredQuery.filter( peliasQuery.view.boundary_country );
 structuredQuery.filter( peliasQuery.view.boundary_circle );
 structuredQuery.filter( peliasQuery.view.boundary_rect );
+structuredQuery.filter( peliasQuery.view.boundary_polygon );
 structuredQuery.filter( peliasQuery.view.sources );
 structuredQuery.filter( peliasQuery.view.layers );
 structuredQuery.filter( peliasQuery.view.categories );
@@ -65,6 +66,10 @@ function generateQuery( clean ){
       'boundary:rect:bottom': clean['boundary.rect.min_lat'],
       'boundary:rect:left': clean['boundary.rect.min_lon']
     });
+  }
+
+  if( clean['boundary.polygon'] ) {
+    vs.var('boundary:polygon', clean['boundary.polygon']);
   }
 
   // boundary circle

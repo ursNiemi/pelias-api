@@ -27,6 +27,7 @@ fallbackQuery.score( peliasQuery.view.population_only_function );
 fallbackQuery.filter( peliasQuery.view.boundary_country );
 fallbackQuery.filter( peliasQuery.view.boundary_circle );
 fallbackQuery.filter( peliasQuery.view.boundary_rect );
+fallbackQuery.filter( peliasQuery.view.boundary_polygon );
 fallbackQuery.filter( peliasQuery.view.sources );
 fallbackQuery.filter( peliasQuery.view.layers );
 fallbackQuery.filter( peliasQuery.view.categories );
@@ -91,6 +92,12 @@ function generateQuery( clean ){
       'boundary:rect:left': clean['boundary.rect.min_lon']
     });
     logStr += '[param:boundary_rect] ';
+  }
+
+  // boundary rect
+  if( clean['boundary.polygon']) {
+    vs.var('boundary:polygon', clean['boundary.polygon']);
+    logStr += '[param:boundary_polygon] ';
   }
 
   // boundary circle

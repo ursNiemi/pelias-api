@@ -17,6 +17,7 @@ addressUsingIdsQuery.score( peliasQuery.view.focus_only_function( peliasQuery.vi
 addressUsingIdsQuery.filter( peliasQuery.view.boundary_country );
 addressUsingIdsQuery.filter( peliasQuery.view.boundary_circle );
 addressUsingIdsQuery.filter( peliasQuery.view.boundary_rect );
+addressUsingIdsQuery.filter( peliasQuery.view.boundary_polygon );
 addressUsingIdsQuery.filter( peliasQuery.view.sources );
 // --------------------------------
 
@@ -155,6 +156,10 @@ function generateQuery( clean, res ){
       'boundary:rect:bottom': clean['boundary.rect.min_lat'],
       'boundary:rect:left': clean['boundary.rect.min_lon']
     });
+  }
+
+  if( clean['boundary.polygon']) {
+    vs.var('boundary:polygon', clean['boundary.polygon']);
   }
 
   // boundary circle
