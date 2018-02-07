@@ -113,8 +113,10 @@ function compareResults(a, b) {
   if(a.source !== b.source) {
     return sources.indexOf(b.source) - sources.indexOf(a.source);
   }
-  if (a.popularity && b.popularity) {
-    return b.popularity - a.popularity;
+  if (a.popularity || b.popularity) {
+    var apop = a.popularity || 0;
+    var bpop = b.popularity || 0;
+    return bpop - apop;
   }
   if (a.distance !== b.distance) {  // focus point defined
     return a.distance - b.distance;
