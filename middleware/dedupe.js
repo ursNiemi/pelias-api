@@ -73,6 +73,10 @@ function isPreferred(existing, candidateReplacement) {
     return hasZip(candidateReplacement) && !hasZip(existing);
   }
 
+  if((existing.popularity || 0) < (candidateReplacement.popularity || 0)) {
+    return true;
+  }
+
   //bind the trumps function to the data items to keep the rest of the function clean
   var trumpsFunc = trumps.bind(null, existing, candidateReplacement);
 
