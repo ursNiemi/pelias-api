@@ -61,16 +61,25 @@ function assignValidLibpostalParsing(parsedText, fromLibpostal, text) {
 
   const street = fromLibpostal.street;
   if(street) {
-    if(!parsedText.name) {
-      parsedText.name = street;
-      if(parsedText.number ) {
-        parsedText.name = parsedText.name + ' ' + parsedText.number;
-      }
-    }
-    if(parsedText.number) {
+    var address = street;
+    if(parsedText.number ) {
+      address = address + ' ' + parsedText.number;
+
       // plain parsed street is suspicious as Libpostal often maps venue name to street
       // better to search it only via name, if no number is parsed
-      parsedText.street = street;
+      parsedText.street = street; // so assign only when number is present
+    }
+    if(!parsedText.name) {
+      parsedText.name = address;
+    }
+
+    // do some cleanup
+    if (parsedText.regions) {
+      var addrIndex = parsedText.regions.indexOf(address);
+      if (addrIndex > -1) {
+        parsedText.regions.splice(addrIndex, 1);
+        parsedText.admin_parts = parsedText.regions.join(DELIM + ' ');
+      }
     }
   }
 
