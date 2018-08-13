@@ -78,7 +78,13 @@ function assignValidLibpostalParsing(parsedText, fromLibpostal, text) {
       var addrIndex = parsedText.regions.indexOf(address);
       if (addrIndex > -1) {
         parsedText.regions.splice(addrIndex, 1);
-        parsedText.admin_parts = parsedText.regions.join(DELIM + ' ');
+        if (parsedText.regions.length === 0) {
+          delete parsedText.regions;
+          delete parsedText.admin_parts;
+        }
+        else {
+          parsedText.admin_parts = parsedText.regions.join(DELIM + ' ');
+        }
       }
     }
   }
@@ -93,8 +99,11 @@ function assignValidLibpostalParsing(parsedText, fromLibpostal, text) {
     }
   }
 
-  const city = fromLibpostal.city;
+  var city = fromLibpostal.city;
   if(city) {
+    if(parsedText.name && city === parsedText.name + ' ' + parsedText.name) {
+      city = parsedText.name;
+    }
     parsedText.city = city;
     if(parsedText.name && parsedText.name !== city) {
       addAdmin(parsedText, city);
