@@ -99,8 +99,11 @@ function assignValidLibpostalParsing(parsedText, fromLibpostal, text) {
     }
   }
 
-  const city = fromLibpostal.city;
+  var city = fromLibpostal.city;
   if(city) {
+    if(parsedText.name && city === parsedText.name + ' ' + parsedText.name) {
+      city = parsedText.name;
+    }
     parsedText.city = city;
     if(parsedText.name && parsedText.name !== city) {
       addAdmin(parsedText, city);
