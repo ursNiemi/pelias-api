@@ -9,13 +9,13 @@ RUN apt-get update
 RUN echo 'APT::Acquire::Retries "20";' >> /etc/apt/apt.conf
 RUN apt-get install -y --no-install-recommends git curl libsnappy-dev autoconf automake libtool pkg-config
 
-RUN mkdir -p /mnt/data/libpostal
+RUN mkdir -p /mnt/data
 
 RUN git clone https://github.com/openvenues/libpostal \
   && cd libpostal \
   && git checkout tags/v1.1-alpha \
   && ./bootstrap.sh \
-  && ./configure --datadir=/mnt/data/libpostal \
+  && ./configure --datadir=/mnt/data \
   && make -j4 \
   && make install \
   && ldconfig
