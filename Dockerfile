@@ -1,5 +1,4 @@
-FROM node:4.6.0
-MAINTAINER Pelias
+FROM node:6.14-jessie
 
 ENV PORT=8080
 EXPOSE ${PORT}
@@ -9,14 +8,14 @@ RUN apt-get update
 RUN echo 'APT::Acquire::Retries "20";' >> /etc/apt/apt.conf
 RUN apt-get install -y --no-install-recommends git curl libsnappy-dev autoconf automake libtool pkg-config
 
-RUN mkdir -p /mnt/data/libpostal
+RUN mkdir -p /mnt/data
 
 RUN git clone https://github.com/openvenues/libpostal \
   && cd libpostal \
-  && git checkout tags/v1.0.0 \
+  && git checkout tags/v1.1-alpha \
   && ./bootstrap.sh \
-  && ./configure --datadir=/mnt/data/libpostal \
-  && make \
+  && ./configure --datadir=/mnt/data \
+  && make -j4 \
   && make install \
   && ldconfig
 
