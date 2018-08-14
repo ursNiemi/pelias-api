@@ -1,5 +1,4 @@
-FROM node:4.6.0
-MAINTAINER Pelias
+FROM node:6.14-jessie
 
 ENV PORT=8080
 EXPOSE ${PORT}
