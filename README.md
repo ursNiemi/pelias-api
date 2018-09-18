@@ -140,7 +140,7 @@ $ curl localhost:9200/pelias/_count?pretty
 
 Travis tests every release against Node.js versions `4` and `6`.
 
-[![Build Status](https://travis-ci.org/pelias/api.png?branch=master)](https://travis-ci.org/pelias/api)
+[![Build Status](https://travis-ci.com/pelias/api.png?branch=master)](https://travis-ci.com/pelias/api)
 
 
 ### Versioning
