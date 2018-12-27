@@ -1,4 +1,3 @@
-
 module.exports = {
   'query': {
     'bool': {
@@ -33,35 +32,21 @@ module.exports = {
             }
           },
           'functions': [{
-            'linear': {
+            'exp': {
               'center_point': {
                 'origin': {
                   'lat': 0,
                   'lon': 0
                 },
                 'offset': '0km',
-                'scale': '250km',
+                'scale': '50km',
                 'decay': 0.5
               }
             },
             'weight': 15
           }],
           'score_mode': 'avg',
-          'boost_mode': 'replace',
-          'filter': {
-            'or': [
-              {
-                'term': {
-                  'layer': 'venue'
-                }
-              },
-              {
-                'term': {
-                  'layer': 'address'
-                }
-              }
-            ]
-          }
+          'boost_mode': 'replace'
         }
       },{
         'function_score': {

@@ -1,5 +1,3 @@
-'use strict';
-
 const placeholder = require('../../../controller/placeholder');
 const proxyquire =  require('proxyquire').noCallThru();
 const mock_logger = require('pelias-mock-logger');
@@ -214,7 +212,7 @@ module.exports.tests.success = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -293,7 +291,7 @@ module.exports.tests.success = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:2]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:2]'));
       t.end();
     });
 
@@ -332,7 +330,7 @@ module.exports.tests.success = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -357,7 +355,7 @@ module.exports.tests.success = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:1]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:1]'));
       t.end();
     });
 
@@ -395,7 +393,7 @@ module.exports.tests.success = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -417,7 +415,7 @@ module.exports.tests.success = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:1]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:1]'));
       t.end();
     });
 
@@ -455,7 +453,7 @@ module.exports.tests.success = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -475,7 +473,7 @@ module.exports.tests.success = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:1]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:1]'));
       t.end();
     });
 
@@ -520,7 +518,7 @@ module.exports.tests.success = (test, common) => {
       controller(req, res, () => {
         const expected_res = {
           meta: {
-            query_type: 'fallback'
+            query_type: 'search_fallback'
           },
           data: [
             {
@@ -540,7 +538,7 @@ module.exports.tests.success = (test, common) => {
         };
 
         t.deepEquals(res, expected_res);
-        t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:1]'));
+        t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:1]'));
       });
 
     });
@@ -585,7 +583,7 @@ module.exports.tests.success = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -609,7 +607,7 @@ module.exports.tests.success = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:1]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:1]'));
       t.end();
     });
 
@@ -758,7 +756,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -876,7 +874,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1077,7 +1075,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1193,7 +1191,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1347,7 +1345,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1405,7 +1403,7 @@ module.exports.tests.result_filtering = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:3]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:3]'));
       t.end();
     });
 
@@ -1482,7 +1480,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1540,7 +1538,7 @@ module.exports.tests.result_filtering = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:3]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:3]'));
       t.end();
     });
 
@@ -1631,7 +1629,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1682,7 +1680,7 @@ module.exports.tests.result_filtering = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:2]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:2]'));
       t.end();
     });
 
@@ -1781,7 +1779,7 @@ module.exports.tests.result_filtering = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1854,7 +1852,7 @@ module.exports.tests.result_filtering = (test, common) => {
       };
 
       t.deepEquals(res, expected_res);
-      t.ok(logger.isInfoMessage('[controller:placeholder] [result_count:3]'));
+      t.ok(logger.isDebugMessage('[controller:placeholder] [result_count:3]'));
       t.end();
     });
 
@@ -1908,7 +1906,7 @@ module.exports.tests.lineage_errors = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -1982,7 +1980,7 @@ module.exports.tests.lineage_errors = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -2055,7 +2053,7 @@ module.exports.tests.lineage_errors = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -2115,7 +2113,7 @@ module.exports.tests.geometry_errors = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -2174,7 +2172,7 @@ module.exports.tests.centroid_errors = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -2234,7 +2232,7 @@ module.exports.tests.centroid_errors = (test, common) => {
     controller(req, res, () => {
       const expected_res = {
         meta: {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         },
         data: [
           {
@@ -2304,7 +2302,7 @@ module.exports.tests.boundingbox_errors = (test, common) => {
       controller(req, res, () => {
         const expected_res = {
           meta: {
-            query_type: 'fallback'
+            query_type: 'search_fallback'
           },
           data: [
             {
@@ -2358,7 +2356,7 @@ module.exports.tests.error_conditions = (test, common) => {
     controller(req, res, () => {
       t.deepEquals(res, {}, 'res should not have been modified');
       t.deepEquals(req.errors, ['placeholder service error']);
-      t.notOk(logger.isInfoMessage(/\\[controller:placeholder\\] \\[result_count:\\d+\\]/));
+      t.notOk(logger.isDebugMessage(/\\[controller:placeholder\\] \\[result_count:\\d+\\]/));
       t.end();
     });
 
@@ -2387,7 +2385,7 @@ module.exports.tests.error_conditions = (test, common) => {
     controller(req, res, () => {
       t.deepEquals(res, {}, 'res should not have been modified');
       t.deepEquals(req.errors, ['placeholder service error']);
-      t.notOk(logger.isInfoMessage(/\\[controller:placeholder\\] \\[result_count:\\d+\\]/));
+      t.notOk(logger.isDebugMessage(/\\[controller:placeholder\\] \\[result_count:\\d+\\]/));
       t.end();
     });
 
@@ -2412,7 +2410,7 @@ module.exports.tests.error_conditions = (test, common) => {
     controller(req, res, () => {
       t.deepEquals(res, {}, 'res should not have been modified');
       t.deepEquals(req.errors, [{ error_key: 'error_value' }]);
-      t.notOk(logger.isInfoMessage(/\\[controller:placeholder\\] \\[result_count:\\d+\\]/));
+      t.notOk(logger.isDebugMessage(/\\[controller:placeholder\\] \\[result_count:\\d+\\]/));
       t.end();
     });
 

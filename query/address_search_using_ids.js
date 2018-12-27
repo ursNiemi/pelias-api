@@ -100,23 +100,28 @@ function generateQuery( clean, res ){
   const vs = new peliasQuery.Vars( defaults );
   const results = _.defaultTo(res.data, []);
 
-  const logParts = ['query:address_search_using_ids', 'parser:libpostal'];
-
   // sources
   if( !_.isEmpty(clean.sources) ) {
     vs.var( 'sources', clean.sources);
-    logParts.push('param:sources');
   }
 
   // size
   if( clean.querySize ) {
     vs.var( 'size', clean.querySize );
-    logParts.push('param:querySize');
   }
 
   if( ! _.isEmpty(clean.parsed_text.number) ){
     vs.var( 'input:housenumber', clean.parsed_text.number );
   }
+
+  if( ! _.isEmpty(clean.parsed_text.unit) ){
+    vs.var( 'input:unit', clean.parsed_text.unit );
+  }
+
+  if( ! _.isEmpty(clean.parsed_text.postalcode) ){
+    vs.var( 'input:postcode', clean.parsed_text.postalcode );
+  }
+
   vs.var( 'input:street', clean.parsed_text.street );
 
   // find the first granularity band for which there are results
@@ -184,11 +189,8 @@ function generateQuery( clean, res ){
     });
   }
 
-  // format the log parts into a single coherent string
-  logger.info(logParts.map(part => `[${part}]`).join(' '));
-
   return {
-    type: 'fallback',
+    type: 'address_search_using_ids',
     body: addressUsingIdsQuery.render(vs)
   };
 

@@ -30,6 +30,7 @@ module.exports.tests.base_query = (test, common) => {
     const clean = {
       parsed_text: {
         number: 'housenumber value',
+        postalcode: 'postcode value',
         street: 'street value'
       }
     };
@@ -50,9 +51,10 @@ module.exports.tests.base_query = (test, common) => {
 
     const generatedQuery = generateQuery(clean, res);
 
-    t.equals(generatedQuery.type, 'fallback');
+    t.equals(generatedQuery.type, 'address_search_using_ids');
 
     t.equals(generatedQuery.body.vs.var('input:housenumber').toString(), 'housenumber value');
+    t.equals(generatedQuery.body.vs.var('input:postcode').toString(), 'postcode value');
     t.equals(generatedQuery.body.vs.var('input:street').toString(), 'street value');
     t.notOk(generatedQuery.body.vs.isset('sources'));
     t.equals(generatedQuery.body.vs.var('size').toString(), 20);
@@ -69,7 +71,6 @@ module.exports.tests.base_query = (test, common) => {
       'sources view'
     ]);
 
-    t.deepEquals(logger.getInfoMessages(), ['[query:address_search_using_ids] [parser:libpostal]']);
     t.end();
 
   });
@@ -104,7 +105,6 @@ module.exports.tests.other_parameters = (test, common) => {
     const generatedQuery = generateQuery(clean, res);
 
     t.equals(generatedQuery.body.vs.var('size').toString(), 'querySize value');
-    t.deepEquals(logger.getInfoMessages(), ['[query:address_search_using_ids] [parser:libpostal] [param:querySize]']);
     t.end();
 
   });
@@ -137,7 +137,6 @@ module.exports.tests.other_parameters = (test, common) => {
     const generatedQuery = generateQuery(clean, res);
 
     t.deepEquals(generatedQuery.body.vs.var('sources').toString(), ['source 1', 'source 2']);
-    t.deepEquals(logger.getInfoMessages(), ['[query:address_search_using_ids] [parser:libpostal] [param:sources]']);
     t.end();
 
   });

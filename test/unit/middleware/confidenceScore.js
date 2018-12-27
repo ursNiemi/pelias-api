@@ -47,7 +47,7 @@ module.exports.tests.confidenceScore = function(test, common) {
       }],
       meta: {
         scores: [10],
-        query_type: 'original'
+        query_type: 'search_original'
       }
     };
 
@@ -89,7 +89,7 @@ module.exports.tests.confidenceScore = function(test, common) {
       }],
       meta: {
         scores: [10],
-        query_type: 'original'
+        query_type: 'search_original'
       }
     };
 
@@ -125,7 +125,7 @@ module.exports.tests.confidenceScore = function(test, common) {
       }],
       meta: {
         scores: [10],
-        query_type: 'original'
+        query_type: 'search_original'
       }
     };
 
@@ -134,7 +134,7 @@ module.exports.tests.confidenceScore = function(test, common) {
     t.end();
   });
 
-  test('should only work for original query_type', function(t) {
+  test('should only work for search_original query_type', function(t) {
     var req = {
       clean: {
         text: '123 Main St, City, NM',
@@ -161,12 +161,76 @@ module.exports.tests.confidenceScore = function(test, common) {
       }],
       meta: {
         scores: [10],
-        query_type: 'fallback'
+        query_type: 'search_fallback'
       }
     };
 
     confidenceScore(req, res, function() {});
     t.false(res.data[0].hasOwnProperty('confidence'), 'score was not set');
+    t.end();
+  });
+
+  test('missing parent object should not throw an exception', function(t) {
+    var req = {
+      clean: {
+        text: '123 Main St, City, NM',
+        parsed_text: {
+          number: 123,
+          street: 'Main St',
+          state: 'NM'
+        }
+      }
+    };
+    var res = {
+      data: [{
+        _score: 10,
+        found: true,
+        value: 1,
+        center_point: { lat: 100.1, lon: -50.5 },
+        name: { default: 'test name1' },
+      }],
+      meta: {
+        scores: [10],
+        query_type: 'search_original'
+      }
+    };
+
+    t.doesNotThrow(() => {
+      confidenceScore(req, res, () => {});
+    });
+    t.equal(res.data[0].confidence, 0.28, 'score was set');
+    t.end();
+  });
+
+  test('works with name aliases', function(t) {
+    var req = {
+      clean: {
+        text: 'example',
+        parsed_text: {
+          number: 123,
+          street: 'example',
+          state: 'EG'
+        }
+      }
+    };
+    var res = {
+      data: [{
+        _score: 10,
+        found: true,
+        value: 1,
+        center_point: { lat: 100.1, lon: -50.5 },
+        name: { default: ['test name1', 'test name2'] }, // note the array
+      }],
+      meta: {
+        scores: [10],
+        query_type: 'search_original'
+      }
+    };
+
+    t.doesNotThrow(() => {
+      confidenceScore(req, res, () => {});
+    });
+    t.equal(res.data[0].confidence, 0.28, 'score was set');
     t.end();
   });
 };

@@ -1,11 +1,10 @@
-
 var sanitizeAll = require('../sanitizer/sanitizeAll'),
     sanitizers = {
       singleScalarParameters: require('../sanitizer/_single_scalar_parameters')(),
       debug: require('../sanitizer/_debug')(),
       ids: require('../sanitizer/_ids')(),
+      private: require('../sanitizer/_flag_bool')('private', false),
       lang: require('../sanitizer/_lang')(),
-      private: require('../sanitizer/_flag_bool')('private', false)
     };
 
 // middleware

@@ -6,7 +6,6 @@ module.exports.middleware = (_api_pelias_config) => {
   var sanitizers = {
         singleScalarParameters: require('../sanitizer/_single_scalar_parameters')(),
         debug: require('../sanitizer/_debug')(),
-        quattroshapes_deprecation: require('../sanitizer/_deprecate_quattroshapes')(),
         text: require('../sanitizer/_text')(),
         size: require('../sanitizer/_size')(/* use defaults*/),
         lang: require('../sanitizer/_lang')(),
@@ -20,7 +19,8 @@ module.exports.middleware = (_api_pelias_config) => {
         boundary_country: require('../sanitizer/_boundary_country')(),
         categories: require('../sanitizer/_categories')(),
         // this can go away once geonames has been abrogated
-        geonames_warnings: require('../sanitizer/_geonames_warnings')()
+        geonames_warnings: require('../sanitizer/_geonames_warnings')(),
+        request_language: require('../sanitizer/_request_language')()
       };
 
   return ( req, res, next ) => {

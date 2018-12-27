@@ -141,7 +141,8 @@ module.exports.tests.text_parser = function(test, common) {
 
     var expected_clean = {
       parser: 'addressit',
-      text: 'yugolsavia'
+      text: 'yugolsavia',
+      parsed_text: {}
     };
 
     var messages = sanitizer.sanitize(raw, clean);
@@ -161,7 +162,8 @@ module.exports.tests.text_parser = function(test, common) {
 
     var expected_clean = {
       parser: 'addressit',
-      text: 'small town'
+      text: 'small town',
+      parsed_text: {}
     };
 
     var messages = sanitizer.sanitize(raw, clean);
@@ -181,7 +183,8 @@ module.exports.tests.text_parser = function(test, common) {
 
     var expected_clean = {
       parser: 'addressit',
-      text: '123 main'
+      text: '123 main',
+      parsed_text: {}
     };
 
     var messages = sanitizer.sanitize(raw, clean);
@@ -201,7 +204,8 @@ module.exports.tests.text_parser = function(test, common) {
 
     var expected_clean = {
       parser: 'addressit',
-      text: 'main 123'
+      text: 'main 123',
+      parsed_text: {}
     };
 
     var messages = sanitizer.sanitize(raw, clean);
@@ -339,17 +343,43 @@ module.exports.tests.text_parser = function(test, common) {
 
   });
 
+  test('whitespace-only input counts as empty', (t) => {
+    const raw = { text: ' ' };
+    const clean = {};
+
+    const expected_clean = {};
+
+    const messages = sanitizer.sanitize(raw, clean);
+
+    t.deepEquals(clean, expected_clean);
+    t.deepEquals(messages.errors, ['invalid param \'text\': text length, must be >0']);
+    t.deepEquals(messages.warnings, [], 'no warnings');
+    t.end();
+  });
+
   test('return an array of expected parameters in object form for validation', (t) => {
     const expected = [{ name: 'text' }];
     const validParameters = sanitizer.expected();
     t.deepEquals(validParameters, expected);
     t.end();
   });
+
+  test('Australia - state only', (t) => {
+    const raw = { text: 'NSW' };
+    const clean = {};
+    const expected_clean = { text: 'NSW', parser: 'addressit', parsed_text: {} };
+    const messages = sanitizer.sanitize(raw, clean);
+
+    t.deepEquals(clean, expected_clean);
+    t.deepEquals(messages.errors, []);
+    t.deepEquals(messages.warnings, [], 'no warnings');
+    t.end();
+  });
 };
 
 module.exports.all = function (tape, common) {
   function test(name, testFunction) {
-    return tape('sanitizeR _text: ' + name, testFunction);
+    return tape('sanitizer _text: ' + name, testFunction);
   }
 
   for( var testCase in module.exports.tests ){

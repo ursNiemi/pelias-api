@@ -1,5 +1,3 @@
-'use strict';
-
 const _ = require('lodash');
 const is_coarse_reverse = require('../../../../controller/predicates/is_coarse_reverse');
 
@@ -17,7 +15,9 @@ const coarse_layers = [
   'borough',
   'neighbourhood',
   'microhood',
-  'disputed'
+  'disputed',
+  'ocean',
+  'marinearea'
 ];
 
 module.exports.tests = {};

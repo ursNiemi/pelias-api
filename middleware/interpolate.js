@@ -2,6 +2,9 @@ const async = require('async');
 const logger = require( 'pelias-logger' ).get( 'api' );
 const source_mapping = require('../helper/type_mapping').source_mapping;
 const _ = require('lodash');
+const stable = require('stable');
+const Debug = require('../helper/debug');
+const debugLog = new Debug('middleware:interpolate');
 
 /**
 example response from interpolation web service:
@@ -21,14 +24,37 @@ example response from interpolation web service:
 }
 **/
 
+// The interpolation middleware layer uses async.map to iterate over the results
+//  since the interpolation service only operates on single inputs.  The problem
+//  with async.map is that if a single error is returned then the entire batch
+//  exits early.  This function wraps the service call to intercept the error so
+//  that async.map never returns an error.
+function error_intercepting_service(service, req) {
+  return (street_result, next) => {
+    service(req, street_result, (err, interpolation_result, metadata) => {
+      if (err) {
+        logger.error(`[middleware:interpolation] ${_.defaultTo(err.message, err)}`);
+        // now that the error has been caught and reported, act as if there was no error
+        return next(null, null);
+      }
+
+      // metadata can't be passed as 3rd parameter here, so include in result
+      if (interpolation_result) {
+        interpolation_result.metadata = metadata;
+      }
+
+      // no error occurred, so pass along the result
+      return next(null, interpolation_result);
+    });
+  };
+}
+
 function setup(service, should_execute) {
   return function controller(req, res, next) {
+    // bail early if the service shouldn't execute
     if (!should_execute(req, res)) {
       return next();
     }
-
-    // bind the service to the req which doesn't change
-    const req_bound_service = _.partial(service, req);
 
     // only interpolate the street-layer results
     // save this off into a separate array so that when docs are annotated
@@ -37,25 +63,42 @@ function setup(service, should_execute) {
 
     // perform interpolations asynchronously for all relevant hits
     const start = (new Date()).getTime();
-    async.map(street_results, req_bound_service, (err, interpolation_results) => {
-      if (err) {
-        logger.error(`[middleware:interpolation] ${_.defaultTo(err.message, err)}`);
-        return next();
-      }
+    const initialTime = debugLog.beginTimer(req);
 
+    const startTime = Date.now();
+    const logInfo = {
+      controller: 'interpolation', //technically middleware, but stay consistent with other log lines
+      street_count: street_results.length,
+      params: req.clean
+    };
+
+    // call the interpolation service asynchronously on every street result
+    async.map(street_results, error_intercepting_service(service, req), (err, interpolation_results) => {
+      // iterate the interpolation results, mapping back into the source results
       interpolation_results.forEach((interpolation_result, idx) => {
         const source_result = street_results[idx];
+        const resultLogInfo = {
+          controller: 'interpolation',
+          street_name: street_results[idx].name.default,
+          street_id: street_results[idx].source_id,
+          outcome: 'hit', //assume hit, update later if not
+          idx: idx,
+          response_time: _.get(interpolation_result, 'metadata.response_time')
+        };
 
         // invalid / not useful response, debug log for posterity
         // note: leave this hit unmodified
         if (!_.has(interpolation_result, 'properties')) {
-          logger.debug(`[interpolation] [miss] ${req.clean.parsed_text}`);
+          resultLogInfo.outcome = 'miss';
+          debugLog.push(req, 'miss');
+          logger.info('interpolation response', resultLogInfo);
           return;
         }
 
-        // the interpolation service returned a valid result, debug log for posterity
-        // note: we now merge those values with the existing 'street' record
-        logger.debug(`[interpolation] [hit] ${req.clean.parsed_text} ${JSON.stringify(interpolation_result)}`);
+        // the interpolation service returned a valid result
+        // we now merge those values with the existing 'street' record
+        logger.info('interpolation response', resultLogInfo);
+        debugLog.push(req, interpolation_result);
 
         // -- metadata --
         source_result.layer = 'address';
@@ -96,21 +139,21 @@ function setup(service, should_execute) {
 
       // sort the results to ensure that addresses show up higher than street centroids
       if (_.has(res, 'data')) {
-        res.data.sort((a, b) => {
+        res.data = stable(res.data, (a, b) => {
           if (a.layer === 'address' && b.layer !== 'address') { return -1; }
           if (a.layer !== 'address' && b.layer === 'address') { return 1; }
           return 0;
         });
       }
 
-      // log the execution time, continue
-      logger.info( `[interpolation] [took] ${(new Date()).getTime() - start} ms`);
+
+      // log and continue
+      logInfo.total_response_time = Date.now() - startTime;
+      logger.info('interpolation', logInfo);
+      debugLog.stopTimer(req, initialTime);
       next();
-
     });
-
   };
-
 }
 
 module.exports = setup;

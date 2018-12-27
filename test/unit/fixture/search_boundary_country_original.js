@@ -1,16 +1,7 @@
-
 module.exports = {
   'query': {
     'bool': {
       'must': [
-        {
-          'match': {
-            'parent.country_a': {
-              'analyzer': 'standard',
-              'query': 'ABC'
-            }
-          }
-        },
         {
           'match': {
             'name.default': {
@@ -88,6 +79,14 @@ module.exports = {
             'layer': [
               'test'
             ]
+          }
+        },
+        {
+          'match': {
+            'parent.country_a': {
+              'analyzer': 'standard',
+              'query': 'ABC'
+            }
           }
         }
       ]

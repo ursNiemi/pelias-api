@@ -2,6 +2,8 @@ const _ = require('lodash');
 const logger = require('pelias-logger').get('api');
 const Document = require('pelias-model').Document;
 const geolib = require('geolib');
+const Debug = require('../helper/debug');
+const debugLog = new Debug('controller:placeholder');
 
 // composition of toNumber and isFinite, useful for single call to convert a value
 //  to a number, then checking to see if it's finite
@@ -241,8 +243,18 @@ function setup(placeholderService, do_geometric_filters_apply, should_execute) {
     if (!should_execute(req, res)) {
       return next();
     }
+    const initialTime = debugLog.beginTimer(req);
+    const start = Date.now();
 
     placeholderService(req, (err, results) => {
+      logger.info('placeholder', {
+        response_time: Date.now() - start,
+        params: req.clean,
+        result_count: _.defaultTo(res.data, []).length,
+        text_length: _.get(req, 'clean.text.length', 0),
+        controller: 'placeholder',
+      });
+
       if (err) {
         // push err.message or err onto req.errors
         req.errors.push( _.get(err, 'message', err));
@@ -254,7 +266,7 @@ function setup(placeholderService, do_geometric_filters_apply, should_execute) {
         // boundary.country filter must happen after synthesis since multiple
         //  lineages may produce different country docs
         res.meta = {
-          query_type: 'fallback'
+          query_type: 'search_fallback'
         };
 
         res.data = results
@@ -278,9 +290,12 @@ function setup(placeholderService, do_geometric_filters_apply, should_execute) {
           `[result_count:${_.defaultTo(res.data, []).length}]`
         ];
 
-        logger.info(messageParts.join(' '));
+        logger.debug(messageParts.join(' '));
+        debugLog.push(req, messageParts[1].slice(1,-1));
+        debugLog.push(req, res.data);
       }
 
+      debugLog.stopTimer(req, initialTime);
       return next();
     });
 

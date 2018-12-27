@@ -1,5 +1,4 @@
-'use strict';
-
+const _ = require('lodash');
 const setup = require('../../../controller/place');
 const proxyquire =  require('proxyquire').noCallThru();
 
@@ -51,11 +50,11 @@ module.exports.tests.success = (test, common) => {
         ids: [
           {
             id: 'id1',
-            layers: 'layer1'
+            layer: 'layer1'
           },
           {
             id: 'id2',
-            layers: 'layer2'
+            layer: 'layer2'
           }
         ]
       },
@@ -179,8 +178,8 @@ module.exports.tests.timeout = function(test, common) {
         get: (service) => {
           t.equal(service, 'api');
           return {
-            info: (msg) => {
-              infoMesssages.push(msg);
+            info: (msg, json) => {
+              infoMesssages.push({ msg:msg, json:json});
             },
             debug: () => {}
           };
@@ -205,9 +204,9 @@ module.exports.tests.timeout = function(test, common) {
     const next = () => {
       t.equal(searchServiceCallCount, 3+1);
 
-      t.ok(infoMesssages.indexOf('request timed out on attempt 1, retrying') !== -1);
-      t.ok(infoMesssages.indexOf('request timed out on attempt 2, retrying') !== -1);
-      t.ok(infoMesssages.indexOf('request timed out on attempt 3, retrying') !== -1);
+      t.ok(infoMesssages.find(function(msg) {
+        return _.get(msg, 'json.retries', 2);
+      }));
 
       t.deepEqual(req.errors, [timeoutError.message]);
       t.deepEqual(res, {});
