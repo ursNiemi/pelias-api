@@ -34,9 +34,27 @@ function setup(peliasConfig) {
 }
 
 
-function matchName(text, name) { // compute matching score
+function matchName(text, name, i) { // compute matching score
   var name2 = removeNumbers(name);
-  return fuzzy.match(text, name2);
+  return {
+    value: fuzzy.match(text, name2),
+    index: i
+  };
+}
+
+function matchNames(text, names) { // compute matching score
+  if (names instanceof Array) {
+    var bestScore = matchName(text, names[0], 0);
+    for(var i = 1; i < names.length; i++) {
+      var newScore = matchName(text, names[i], i);
+      if (newScore.value > bestScore.value) {
+        bestScore = newScore;
+      }
+    }
+    return bestScore;
+  } else {
+    return matchName(text, names, 0);
+  }
 }
 
 
@@ -73,7 +91,10 @@ function matchLanguage(req, res, next) {
   var matchDoc =  function(doc) {
     var names = doc.name;
     var _bestLang;
-    var _bestScore = -1;
+    var _bestScore = {
+      value: -1,
+      index: 0
+    };
 
     var updateLocalBest = function(lang, score) {
       _bestScore = score;
@@ -84,11 +105,11 @@ function matchLanguage(req, res, next) {
       if(languages.indexOf(lang)===-1) {
         continue; // accept only configured languages
       }
-      var score = matchName(name, names[lang]);
-      if (score > _bestScore ) {
+      var score = matchNames(name, names[lang]);
+      if (score.value > _bestScore.value ) {
         updateLocalBest(lang, score);
       }
-      else if (score === _bestScore && _bestLang !== currentLang) {
+      else if (score.value === _bestScore.value && _bestLang !== currentLang) {
         // explicit lang parameter has 2nd highest priority
         if (lang === currentLang) {
           updateLocalBest(lang, score);
@@ -105,6 +126,9 @@ function matchLanguage(req, res, next) {
     }
     if (_bestLang) {
       doc.altName = names[_bestLang];
+      if(doc.altName instanceof Array) {
+        doc.altName = doc.altName[_bestScore.index];
+      }
 
       if(!bestLang) {
         // take global best from 1st doc which has best conf. scores
@@ -118,7 +142,7 @@ function matchLanguage(req, res, next) {
   _.forEach(res.data, matchDoc);
 
   // change lang if best hit is good enough
-  if (bestLang && bestScore > languageMatchThreshold) {
+  if (bestLang && bestScore.value > languageMatchThreshold) {
     if (languageMap[bestLang]) {
       bestLang = languageMap[bestLang]; // map fake languages such as 'local' to real language
     }
