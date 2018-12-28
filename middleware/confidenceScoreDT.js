@@ -289,31 +289,41 @@ function checkLanguageNames(text, doc, stripNumbers, tryGenitive) {
     });
   };
 
+  var checkLanguageNameArray =  function(namearr) {
+    for (var n in namearr) {
+      var name = normalize(n);
+      if(stripNumbers) {
+        name = removeNumbers(name);
+      }
+      var score = checkNewBest(name);
+
+      if (tryGenitive && score > genitiveThreshold && // don't prefix unless base match is OK
+          text.length > 2 + name.length ) { // Shortest admin prefix is 'ii '
+        // prefix with parent admins to catch cases like 'kontulan r-kioski'
+        var parent = doc.parent;
+        for(var key in adminWeights) {
+          var admins = parent[key];
+          if (Array.isArray(admins)) {
+            checkAdminNames(admins, name);
+          } else {
+            checkAdminName(admins, name);
+          }
+        }
+        // try also street: 'helsinginkadun r-kioski'
+        checkAdminName(doc.street, name);
+      }
+    }
+  };
+
   for (var lang in names) {
     if (languages.indexOf(lang) === -1) {
       continue;
     }
-    var name = normalize(names[lang]);
-    if(stripNumbers) {
-      name = removeNumbers(name);
+    var nameArr = names[lang];
+    if (!Array.isArray(nameArr)) {
+      nameArr = [nameArr];
     }
-    var score = checkNewBest(name);
-
-    if (tryGenitive && score > genitiveThreshold && // don't prefix unless base match is OK
-        text.length > 2 + name.length ) { // Shortest admin prefix is 'ii '
-      // prefix with parent admins to catch cases like 'kontulan r-kioski'
-      var parent = doc.parent;
-      for(var key in adminWeights) {
-        var admins = parent[key];
-        if (Array.isArray(admins)) {
-          checkAdminNames(admins, name);
-        } else {
-          checkAdminName(admins, name);
-        }
-      }
-      // try also street: 'helsinginkadun r-kioski'
-      checkAdminName(doc.street, name);
-    }
+    checkLanguageNameArray(nameArr);
   }
   logger.debug('name confidence', bestScore, text, bestName);
 
