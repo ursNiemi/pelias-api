@@ -172,7 +172,7 @@ function isPropertyDifferent(item1, item2, prop ){
 
   // do not consider absence of information as a difference,
   // if a more complete document (item1) is already included.
-  if(_.isUndefined(prop2)) {
+  if(_.isUndefined(item2, prop2)) {
     return false;
   }
 
