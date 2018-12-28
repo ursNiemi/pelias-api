@@ -130,17 +130,19 @@ function addRoutes(app, peliasConfig) {
   const interpolationService = serviceWrapper(interpolationConfiguration);
   const isInterpolationEnabled = _.constant(interpolationConfiguration.isEnabled());
 
-  // standard libpostal should use req.clean.text for the `address` parameter
+  /* standard libpostal should use req.clean.text for the `address` parameter
   const libpostalConfiguration = new Libpostal(
     _.defaultTo(peliasConfig.api.services.libpostal, {}),
     _.property('clean.text'));
   const libpostalService = serviceWrapper(libpostalConfiguration);
+  */
 
-  // structured libpostal should use req.clean.parsed_text.address for the `address` parameter
+  /* structured libpostal should use req.clean.parsed_text.address for the `address` parameter
   const structuredLibpostalConfiguration = new Libpostal(
     _.defaultTo(peliasConfig.api.services.libpostal, {}),
     _.property('clean.parsed_text.address'));
   const structuredLibpostalService = serviceWrapper(structuredLibpostalConfiguration);
+  */
 
   // fallback to coarse reverse when regular reverse didn't return anything
   const coarseReverseShouldExecute = all(
@@ -286,7 +288,7 @@ function addRoutes(app, peliasConfig) {
       sanitizers.search.middleware(peliasConfig.api),
       middleware.selectLanguage(),
       middleware.calcSize(),
-      controllers.libpostal(libpostalService, libpostalShouldExecute),
+      controllers.libpostal(libpostalShouldExecute),
       controllers.placeholder(placeholderService, geometricFiltersApply, placeholderGeodisambiguationShouldExecute),
       controllers.placeholder(placeholderService, geometricFiltersApply, placeholderIdsLookupShouldExecute),
 //      controllers.search_with_ids(peliasConfig.api, esclient, queries.address_using_ids, searchWithIdsShouldExecute),
@@ -319,7 +321,7 @@ function addRoutes(app, peliasConfig) {
       sanitizers.structured_geocoding.middleware(peliasConfig.api),
       middleware.selectLanguage(),
       middleware.calcSize(),
-      controllers.structured_libpostal(structuredLibpostalService, structuredLibpostalShouldExecute),
+//      controllers.structured_libpostal(structuredLibpostalService, structuredLibpostalShouldExecute),
       controllers.search(peliasConfig.api, esclient, queries.structured_geocoding, not(hasResponseDataOrRequestErrors)),
       postProc.trimByGranularityStructured(),
       postProc.distances('focus.point.'),
