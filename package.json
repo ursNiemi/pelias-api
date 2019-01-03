@@ -81,8 +81,7 @@
     "tmp": "^0.0.33"
   },
   "pre-commit": [
-    "lint",
-    "prune"
+    "lint"
   ],
   "release": {
     "branch": "master",
