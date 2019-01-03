@@ -51,31 +51,14 @@ function geojsonifyPlace(params, place) {
     lng: parseFloat(place.center_point.lon)
   };
 
-  // assign name, logging a warning if it doesn't exist
-  if (_.has(place, 'name.default')) {
-    doc.name = field.getStringValue(place.name.default);
-  } else {
-    logger.warn(`doc ${doc.gid} does not contain name.default`);
+  if(place.name ) {
+    doc.name = place.name;
   }
 
   // assign all the details info into the doc
   Object.assign(doc, collectDetails(params, place));
 
   return doc;
-}
-
-/**
- * Validate and add name property
- *
- * @param {object} src
- * @param {object} dst
- */
-
-function addName(src, dst) {
-  // map name
-  if(src.name ) {
-    dst.name = src.name;
-  }
 }
 
 /**
