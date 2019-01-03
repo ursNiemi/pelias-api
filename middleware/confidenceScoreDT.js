@@ -290,8 +290,9 @@ function checkLanguageNames(text, doc, stripNumbers, tryGenitive) {
   };
 
   var checkLanguageNameArray =  function(namearr) {
-    for (var n in namearr) {
-      var name = normalize(n);
+    for (var i in namearr) {
+      var name = normalize(namearr[i]);
+
       if(stripNumbers) {
         name = removeNumbers(name);
       }
