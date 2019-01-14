@@ -29,6 +29,7 @@ fallbackQuery.filter( peliasQuery.view.boundary_polygon );
 fallbackQuery.filter( peliasQuery.view.sources );
 fallbackQuery.filter( peliasQuery.view.layers );
 fallbackQuery.filter( peliasQuery.view.categories );
+fallbackQuery.filter( peliasQuery.view.boundary_gid );
 // --------------------------------
 
 /**
@@ -110,6 +111,13 @@ function generateQuery( clean ){
   if( check.string(clean['boundary.country']) ){
     vs.set({
       'boundary:country': clean['boundary.country']
+    });
+  }
+
+  // boundary gid
+  if ( check.string(clean['boundary.gid']) ){
+    vs.set({
+      'boundary:gid': clean['boundary.gid']
     });
   }
 

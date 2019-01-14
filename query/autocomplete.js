@@ -60,6 +60,8 @@ query.filter( peliasQuery.view.sources );
 query.filter( peliasQuery.view.layers );
 query.filter( peliasQuery.view.boundary_rect );
 query.filter( peliasQuery.view.boundary_polygon );
+query.filter( peliasQuery.view.boundary_country );
+query.filter( peliasQuery.view.boundary_gid );
 
 // --------------------------------
 
@@ -135,6 +137,13 @@ function generateQuery( clean ){
 
   if( clean['boundary.polygon']) {
     vs.var('boundary:polygon', clean['boundary.polygon']);
+  }
+  
+  // boundary gid
+  if( check.string(clean['boundary.gid']) ){
+    vs.set({
+      'boundary:gid': clean['boundary.gid']
+    });
   }
 
   // run the address parser

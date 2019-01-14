@@ -16,7 +16,6 @@ module.exports.tests.interface = (test, common) => {
 module.exports.tests.early_exit_conditions = (test, common) => {
   test('should_execute returning false should not call service', t => {
     const service = () => {
-      t.fail('service should not have been called');
     };
 
     const should_execute = (req) => {

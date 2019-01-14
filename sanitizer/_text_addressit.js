@@ -5,7 +5,7 @@
   are not happy with either of these methods but they remain in place
   for purely legacy reasons.
 
-  'naïve parser' provides the following fields:
+  'naive parser' provides the following fields:
   'name', 'admin_parts'
 
   'addressit parser' provides the following fields:
@@ -187,7 +187,7 @@ function _sanitize( raw, clean ){
 
 // naive approach - for admin matching during query time
 // split 'flatiron, new york, ny' into 'flatiron' and 'new york, ny'
-var naïve = function(tokens) {
+var naive = function(tokens) {
   var parsed_text = {};
 
   if( tokens.length > 1 ){
@@ -204,11 +204,13 @@ var naïve = function(tokens) {
 
 function parse(clean) {
 
-  // split query on delimiter
-  var tokens = clean.text.split(DELIM).map( part => part.trim() );
+  // split query on delimiter, trim tokens and remove empty elements
+  var tokens = clean.text.split(DELIM)
+                         .map( part => part.trim() )
+                         .filter( part => part.length > 0 );
 
-  // call the naïve parser to try and split tokens
-  var parsed_text = naïve(tokens);
+  // call the naive parser to try and split tokens
+  var parsed_text = naive(tokens);
 
   // join tokens back togther with normalized delimiters
   var joined = tokens.join(`${DELIM} `);
