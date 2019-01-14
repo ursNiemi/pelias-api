@@ -48,7 +48,6 @@ ADD . ${WORK}
 RUN npm install \
   && npm link pelias-query \
   && npm link pelias-text-analyzer \
-  && npm test \
   && chmod -R a+rwX .
 
 ADD pelias.json.docker pelias.json
