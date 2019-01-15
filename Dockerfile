@@ -6,17 +6,18 @@ EXPOSE ${PORT}
 # install libpostal
 RUN apt-get update
 RUN echo 'APT::Acquire::Retries "20";' >> /etc/apt/apt.conf
-RUN apt-get install -y --no-install-recommends git curl make libsnappy-dev autoconf automake libtool pkg-config
+RUN apt-get install -y --no-install-recommends git curl make libsnappy-dev autoconf automake libtool python pkg-config
 
 RUN mkdir -p /mnt/data
 
-RUN git clone --single-branch https://github.com/openvenues/libpostal \
+RUN git clone --single-branch https://github.com/vesameskanen/libpostal \
   && cd libpostal \
   && git checkout tags/v1.1-alpha \
   && ./bootstrap.sh \
-  && ./configure --datadir=/mnt/data \
+  && ./configure --datadir=/mnt/data --disable-data-download \
   && make -j4 \
   && make install \
+  && ./src/libpostal_data download all /mnt/data/libpostal \
   && ldconfig
 
 # use our extended query module
