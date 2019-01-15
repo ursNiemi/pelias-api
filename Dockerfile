@@ -1,4 +1,4 @@
-FROM node:8-jessie-slim
+FROM node:8-jessie
 
 ENV PORT=8080
 EXPOSE ${PORT}
@@ -6,11 +6,11 @@ EXPOSE ${PORT}
 # install libpostal
 RUN apt-get update
 RUN echo 'APT::Acquire::Retries "20";' >> /etc/apt/apt.conf
-RUN apt-get install -y --no-install-recommends git curl make libsnappy-dev autoconf automake libtool python pkg-config
+RUN apt-get install -y --no-install-recommends git curl libsnappy-dev autoconf automake libtool python pkg-config
 
 RUN mkdir -p /mnt/data
 
-RUN git clone --single-branch https://github.com/vesameskanen/libpostal \
+RUN git clone --single-branch https://github.com/openvenues/libpostal \
   && cd libpostal \
   && ./bootstrap.sh \
   && ./configure --datadir=/mnt/data \
