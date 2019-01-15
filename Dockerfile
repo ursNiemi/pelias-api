@@ -12,7 +12,6 @@ RUN mkdir -p /mnt/data
 
 RUN git clone --single-branch https://github.com/vesameskanen/libpostal \
   && cd libpostal \
-  && git checkout tags/v1.1-alpha \
   && ./bootstrap.sh \
   && ./configure --datadir=/mnt/data \
   && make -j4 \
