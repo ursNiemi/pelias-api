@@ -14,10 +14,9 @@ RUN git clone --single-branch https://github.com/vesameskanen/libpostal \
   && cd libpostal \
   && git checkout tags/v1.1-alpha \
   && ./bootstrap.sh \
-  && ./configure --datadir=/mnt/data --disable-data-download \
+  && ./configure --datadir=/mnt/data \
   && make -j4 \
   && make install \
-  && ./src/libpostal_data download all /mnt/data/libpostal \
   && ldconfig
 
 # use our extended query module
