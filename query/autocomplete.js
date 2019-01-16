@@ -1,27 +1,25 @@
-'use strict';
-
 const peliasQuery = require('pelias-query');
 const textParser = require('./text_parser_addressit');
 const check = require('check-types');
 const logger = require('pelias-logger').get('api');
 const _ = require('lodash');
-
 var defaults = require('./autocomplete_defaults');
+const config = require('pelias-config').generate();
 
 // additional views (these may be merged in to pelias/query at a later date)
 var views = {
+  custom_boosts:              require('./view/boost_sources_and_layers'),
   ngrams_strict:              require('./view/ngrams_strict'),
-  focus_selected_layers:      require('./view/focus_selected_layers'),
   ngrams_last_token_only:     require('./view/ngrams_last_token_only'),
   phrase_first_tokens_only:   require('./view/phrase_first_tokens_only'),
   pop_subquery:               require('./view/pop_subquery'),
-  boost_exact_matches:        require('./view/boost_exact_matches')
+  boost_exact_matches:        require('./view/boost_exact_matches'),
+  max_character_count_layer_filter:   require('./view/max_character_count_layer_filter')
 };
 
-const api = require('pelias-config').generate().api;
-if (api && api.query && api.query.autocomplete && api.query.autocomplete.defaults) {
+if (config && config.query && config.query.autocomplete && config.query.autocomplete.defaults) {
   // merge external defaults if available
-  defaults = _.merge({}, defaults, api.query.autocomplete.defaults);
+  defaults = _.merge({}, defaults, config.query.autocomplete.defaults);
 }
 
 //------------------------------
@@ -32,7 +30,6 @@ var query = new peliasQuery.layout.FilteredBooleanQuery();
 // mandatory matches
 query.score( views.phrase_first_tokens_only, 'must' );
 query.score( views.ngrams_last_token_only, 'must' );
-query.score( peliasQuery.view.boundary_country, 'must' );
 
 // address components
 query.score( peliasQuery.view.address('housenumber') );
@@ -52,15 +49,19 @@ query.score( peliasQuery.view.admin('neighbourhood') );
 
 // scoring boost
 query.score( views.boost_exact_matches );
-query.score( views.focus_selected_layers( views.ngrams_strict ) );
+query.score( peliasQuery.view.focus( views.ngrams_strict ) );
 query.score( peliasQuery.view.popularity( views.pop_subquery ) );
 query.score( peliasQuery.view.population( views.pop_subquery ) );
+query.score( views.custom_boosts( config.get('api.customBoosts') ) );
 
 // non-scoring hard filters
+query.filter( views.max_character_count_layer_filter(['address'], config.get('api.autocomplete.exclude_address_length' ) ) );
 query.filter( peliasQuery.view.sources );
 query.filter( peliasQuery.view.layers );
 query.filter( peliasQuery.view.boundary_rect );
 query.filter( peliasQuery.view.boundary_polygon );
+query.filter( peliasQuery.view.boundary_country );
+query.filter( peliasQuery.view.boundary_gid );
 
 // --------------------------------
 
@@ -72,18 +73,14 @@ function generateQuery( clean ){
 
   const vs = new peliasQuery.Vars( defaults );
 
-  let logStr = '[query:autocomplete] [parser:addressit] ';
-
   // sources
   if( check.array(clean.sources) && clean.sources.length ){
     vs.var( 'sources', clean.sources );
-    logStr += '[param:sources] ';
   }
 
   // layers
   if( check.array(clean.layers) && clean.layers.length ){
     vs.var( 'layers', clean.layers);
-    logStr += '[param:layers] ';
   }
 
   // boundary country
@@ -91,7 +88,6 @@ function generateQuery( clean ){
     vs.set({
       'boundary:country': clean['boundary.country']
     });
-    logStr += '[param:boundary_country] ';
   }
 
   // pass the input tokens to the views so they can choose which tokens
@@ -124,7 +120,6 @@ function generateQuery( clean ){
       'focus:point:lat': clean['focus.point.lat'],
       'focus:point:lon': clean['focus.point.lon']
     });
-    logStr += '[param:focus_point] ';
   }
 
   // boundary rect
@@ -138,20 +133,23 @@ function generateQuery( clean ){
       'boundary:rect:bottom': clean['boundary.rect.min_lat'],
       'boundary:rect:left': clean['boundary.rect.min_lon']
     });
-    logStr += '[param:boundary_rect] ';
   }
 
   if( clean['boundary.polygon']) {
     vs.var('boundary:polygon', clean['boundary.polygon']);
-    logStr += '[param:boundary_polygon] ';
+  }
+  
+  // boundary gid
+  if( check.string(clean['boundary.gid']) ){
+    vs.set({
+      'boundary:gid': clean['boundary.gid']
+    });
   }
 
   // run the address parser
   if( clean.parsed_text ){
-    textParser( clean.parsed_text, vs );
+    textParser( clean, vs );
   }
-
-  logger.info(logStr);
 
   return {
     type: 'autocomplete',

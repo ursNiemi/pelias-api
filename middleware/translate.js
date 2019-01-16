@@ -23,6 +23,9 @@ function translateName(place, lang) {
     } else if (place.name.default) { // fallback
       place.name = place.name.default;
     }
+    if (place.name instanceof Array) {
+      place.name = place.name[0];
+    }
   }
 }
 

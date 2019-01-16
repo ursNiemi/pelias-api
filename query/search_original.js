@@ -1,14 +1,12 @@
-'use strict';
-
 const peliasQuery = require('pelias-query');
 const textParser = require('./text_parser_addressit');
 const check = require('check-types');
 const logger = require('pelias-logger').get('api');
 const _ = require('lodash');
-
 var defaults = require('./search_defaults');
-
+const config = require('pelias-config').generate().api;
 var placeTypes = require('../helper/placeTypes');
+var views = { custom_boosts: require('./view/boost_sources_and_layers') };
 
 // region_a is also an admin field. addressit tries to detect
 // region_a, in which case we use a match query specifically for it.
@@ -16,10 +14,9 @@ var placeTypes = require('../helper/placeTypes');
 // against this with the other admin parts as a fallback
 var adminFields = placeTypes.concat(['region_a']);
 
-const api = require('pelias-config').generate().api;
-if (api && api.query && api.query.search && api.query.search.defaults) {
+if (config && config.query && config.query.search && config.query.search.defaults) {
   // merge external defaults if available
-  defaults = _.merge({}, defaults, api.query.search.defaults);
+  defaults = _.merge({}, defaults, config.query.search.defaults);
 }
 
 //------------------------------
@@ -28,7 +25,6 @@ if (api && api.query && api.query.search && api.query.search.defaults) {
 var query = new peliasQuery.layout.FilteredBooleanQuery();
 
 // mandatory matches
-query.score( peliasQuery.view.boundary_country, 'must' );
 query.score( peliasQuery.view.ngrams, 'must' );
 
 // scoring boost
@@ -49,6 +45,7 @@ query.score( peliasQuery.view.address('postcode') );
 query.score( peliasQuery.view.admin('country_a') );
 query.score( peliasQuery.view.admin('region_a') );
 query.score( peliasQuery.view.admin_multi_match(adminFields, 'peliasAdmin') );
+query.score( views.custom_boosts( config.customBoosts ) );
 
 // non-scoring hard filters
 query.filter( peliasQuery.view.boundary_circle );
@@ -57,6 +54,8 @@ query.filter( peliasQuery.view.boundary_polygon );
 query.filter( peliasQuery.view.sources );
 query.filter( peliasQuery.view.layers );
 query.filter( peliasQuery.view.categories );
+query.filter( peliasQuery.view.boundary_country );
+query.filter( peliasQuery.view.boundary_gid );
 
 // --------------------------------
 
@@ -68,33 +67,27 @@ function generateQuery( clean ){
 
   var vs = new peliasQuery.Vars( defaults );
 
-  let logStr = '[query:search] [parser:addressit] ';
-
   // input text
   vs.var( 'input:name', clean.text );
 
   // sources
   if( check.array(clean.sources) && clean.sources.length ) {
     vs.var( 'sources', clean.sources);
-    logStr += '[param:sources] ';
   }
 
   // layers
   if( check.array(clean.layers) && clean.layers.length ) {
     vs.var( 'layers', clean.layers);
-    logStr += '[param:layers] ';
   }
 
   // categories
   if (clean.categories) {
     vs.var('input:categories', clean.categories);
-    logStr += '[param:categories] ';
   }
 
   // size
   if( clean.querySize ) {
     vs.var( 'size', clean.querySize );
-    logStr += '[param:size] ';
   }
 
   // focus point
@@ -104,7 +97,6 @@ function generateQuery( clean ){
       'focus:point:lat': clean['focus.point.lat'],
       'focus:point:lon': clean['focus.point.lon']
     });
-    logStr += '[param:focus_point] ';
   }
 
   // boundary rect
@@ -118,7 +110,6 @@ function generateQuery( clean ){
       'boundary:rect:bottom': clean['boundary.rect.min_lat'],
       'boundary:rect:left': clean['boundary.rect.min_lon']
     });
-    logStr += '[param:boundary_rect] ';
   }
 
   // boundary circle
@@ -135,12 +126,10 @@ function generateQuery( clean ){
         'boundary:circle:radius': Math.round( clean['boundary.circle.radius'] ) + 'km'
       });
     }
-    logStr += '[param:boundary_circle] ';
   }
 
   if( clean['boundary.polygon']) {
     vs.var('boundary:polygon', clean['boundary.polygon']);
-    logStr += '[param:boundary_polygon] ';
   }
 
   // boundary country
@@ -148,18 +137,22 @@ function generateQuery( clean ){
     vs.set({
       'boundary:country': clean['boundary.country']
     });
-    logStr += '[param:boundary_country] ';
+  }
+
+  // boundary gid
+  if ( check.string(clean['boundary.gid']) ){
+    vs.set({
+      'boundary:gid': clean['boundary.gid']
+    });
   }
 
   // run the address parser
   if( clean.parsed_text ){
-    textParser( clean.parsed_text, vs );
+    textParser( clean, vs );
   }
 
-  logger.info(logStr);
-
   return {
-    type: 'original',
+    type: 'search_original',
     body: query.render(vs)
   };
 }

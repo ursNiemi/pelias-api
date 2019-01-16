@@ -1,4 +1,3 @@
-
 module.exports = {
   'query': {
     'bool': {
@@ -35,7 +34,7 @@ module.exports = {
             }
           },
           'functions': [{
-            'linear': {
+            'exp': {
               'center_point': {
                 'origin': {
                   'lat': 0,

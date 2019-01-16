@@ -2,27 +2,29 @@ var _ = require('lodash');
 
 var SIZE_PADDING = 2;
 
-var MIN_QUERY_SIZE = 20;
+var DEFAULT_MIN_QUERY_SIZE = 20;
 
 /**
  * Utility for calculating query result size
  * incorporating padding for dedupe process
  */
-function setup() {
+
+function setup(min_size) {
+  if (min_size === undefined) {
+    min_size = DEFAULT_MIN_QUERY_SIZE;
+  }
 
   var api = require('pelias-config').generate().api;
   if (api.sizePadding) {
     SIZE_PADDING = api.sizePadding;
   }
-
   return function setQuerySize(req, res, next) {
-   if (_.isUndefined(req.clean) || _.isUndefined(req.clean.size)) {
+    if (_.isUndefined(req.clean) || _.isUndefined(req.clean.size)) {
      return next();
-   }
-
-   req.clean.querySize = calculateSize(req.clean.size);
-   next();
- };
+    }
+    req.clean.querySize = calculateSize(req.clean.size, min_size);
+    next();
+  };
 }
 
 /**
@@ -31,8 +33,8 @@ function setup() {
  * @param {number} cleanSize
  * @returns {number}
  */
-function calculateSize(cleanSize) {
-  return Math.max(MIN_QUERY_SIZE, cleanSize * SIZE_PADDING);
+function calculateSize(cleanSize, min_size) {
+  return Math.max(min_size, cleanSize * SIZE_PADDING);
 }
 
 module.exports = setup;

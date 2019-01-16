@@ -1,4 +1,3 @@
-
 module.exports = {
   'query': {
     'bool': {
@@ -15,13 +14,6 @@ module.exports = {
                 'slop': 3
               }
             }
-          }
-        }
-      }, {
-        'match': {
-          'parent.country_a': {
-            'analyzer': 'standard',
-            'query': 'ABC'
           }
         }
       }],
@@ -58,6 +50,14 @@ module.exports = {
             },
             'weight': 3
           }]
+        }
+      }],
+      'filter': [{
+        'match': {
+          'parent.country_a': {
+            'analyzer': 'standard',
+            'query': 'ABC'
+          }
         }
       }]
     }

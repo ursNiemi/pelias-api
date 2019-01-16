@@ -11,9 +11,10 @@
  * - detection (or specification) of query type. i.e. an address shouldn't match an admin address.
  */
 
-var stats = require('stats-lite');
-var logger = require('pelias-logger').get('api');
-var check = require('check-types');
+const stats = require('stats-lite');
+const logger = require('pelias-logger').get('api');
+const check = require('check-types');
+const field = require('../helper/fieldValue');
 
 var RELATIVE_SCORES = true;
 
@@ -28,7 +29,7 @@ function computeScores(req, res, next) {
   // do nothing if no result data set or if query is not of the original variety
   if (check.undefined(req.clean) || check.undefined(res) ||
       check.undefined(res.data) || check.undefined(res.meta) ||
-      res.meta.query_type !== 'original') {
+      res.meta.query_type !== 'search_original') {
     return next();
   }
 
@@ -94,7 +95,8 @@ function checkForDealBreakers(req, hit) {
     return false;
   }
 
-  if (check.assigned(req.clean.parsed_text.state) && hit.parent.region_a && req.clean.parsed_text.state !== hit.parent.region_a[0]) {
+  if (check.assigned(req.clean.parsed_text.state) && check.assigned(hit.parent) &&
+      hit.parent.region_a && req.clean.parsed_text.state !== hit.parent.region_a[0]) {
     logger.debug('[confidence][deal-breaker]: state !== region_a');
     return true;
   }
@@ -130,12 +132,12 @@ function checkDistanceFromMean(score, mean, stdev) {
 function checkName(text, parsed_text, hit) {
   // parsed_text name should take precedence if available since it's the cleaner name property
   if (check.assigned(parsed_text) && check.assigned(parsed_text.name) &&
-    hit.name.default.toLowerCase() === parsed_text.name.toLowerCase()) {
+    field.getStringValue(hit.name.default).toLowerCase() === parsed_text.name.toLowerCase()) {
     return 1;
   }
 
   // if no parsed_text check the text value as provided against result's default name
-  if (hit.name.default.toLowerCase() === text.toLowerCase()) {
+  if (field.getStringValue(hit.name.default).toLowerCase() === text.toLowerCase()) {
     return 1;
   }
 
@@ -220,8 +222,8 @@ function checkAddress(text, hit) {
     res += propMatch(text.number, (hit.address_parts ? hit.address_parts.number : null), false);
     res += propMatch(text.street, (hit.address_parts ? hit.address_parts.street : null), false);
     res += propMatch(text.postalcode, (hit.address_parts ? hit.address_parts.zip: null), true);
-    res += propMatch(text.state, (hit.parent.region_a ? hit.parent.region_a[0] : null), true);
-    res += propMatch(text.country, (hit.parent.country_a ? hit.parent.country_a[0] :null), true);
+    res += propMatch(text.state, ((hit.parent && hit.parent.region_a) ? hit.parent.region_a[0] : null), true);
+    res += propMatch(text.country, ((hit.parent && hit.parent.country_a) ? hit.parent.country_a[0] :null), true);
 
     res /= checkCount;
   }

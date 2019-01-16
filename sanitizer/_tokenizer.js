@@ -1,5 +1,4 @@
-
-var check = require('check-types');
+const _ = require('lodash');
 
 /**
   simplified version of the elaticsearch tokenizer, used in order to
@@ -27,11 +26,11 @@ function _sanitize( raw, clean ){
 
   // if the text parser has run then we only tokenize the 'name' section
   // of the 'parsed_text' object, ignoring the 'admin' parts.
-  if( clean.hasOwnProperty('parsed_text') ) {
+  if( _.isPlainObject(clean, 'parsed_text') && !_.isEmpty(clean.parsed_text) ) {
     inputParserRanSuccessfully = true;
 
     // parsed_text.name is set, this is the highest priority, use this string
-    if( clean.parsed_text.hasOwnProperty('name') ){
+    if( _.has(clean.parsed_text, 'name') ){
       text = clean.parsed_text.name; // use this string instead
     }
 
@@ -40,7 +39,7 @@ function _sanitize( raw, clean ){
     // additionally, handle the case where parsed_text.number is present
     // note: the addressit module may also produce parsed_text.unit info
     // for now, we discard that information as we don't have an appropriate
-    else if( clean.parsed_text.hasOwnProperty('street') ){
+    else if( _.has(clean.parsed_text, 'street') ){
       text = [
         clean.parsed_text.number,
         clean.parsed_text.street
@@ -55,7 +54,7 @@ function _sanitize( raw, clean ){
   clean.tokens_incomplete = [];
 
   // sanity check that the text is valid.
-  if( check.nonEmptyString( text ) ){
+  if( _.isString(text) && !_.isEmpty(text) ){
 
     // split according to the regex used in the elasticsearch tokenizer
     // see: https://github.com/pelias/schema/blob/master/settings.js
@@ -63,6 +62,9 @@ function _sanitize( raw, clean ){
     clean.tokens = text
       .split(/[\s,\\\/]+/) // split on delimeters
       .filter(function(el){return el;}); // remove empty elements
+  } else {
+    // text is empty, this sanitizer should be a no-op
+    return messages;
   }
 
   /**
@@ -97,6 +99,9 @@ function _sanitize( raw, clean ){
       }
     }
 
+  } else {
+    // set error if no substantial tokens were found
+    messages.errors.push('invalid `text` input: must contain more than just delimiters');
   }
 
   return messages;

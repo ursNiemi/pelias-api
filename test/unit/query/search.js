@@ -30,7 +30,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_linguistic_focus_bbox');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search_linguistic_focus_bbox');
     t.end();
   });
@@ -54,7 +54,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_linguistic_bbox');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search_linguistic_bbox');
     t.end();
   });
@@ -73,7 +73,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_linguistic_only');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search_linguistic_only');
     t.end();
   });
@@ -93,56 +93,8 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_linguistic_focus');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search_linguistic_focus');
-    t.end();
-  });
-
-  test('search search + viewport', function(t) {
-    var clean = {
-      parsed_text: {
-        street: 'street value'
-      },
-      text: 'test', querySize: 10,
-      'focus.viewport.min_lat': 28.49136,
-      'focus.viewport.max_lat': 30.49136,
-      'focus.viewport.min_lon': -87.50622,
-      'focus.viewport.max_lon': -77.50622,
-      layers: ['test']
-    };
-
-    var query = generate(clean);
-
-    var compiled = JSON.parse( JSON.stringify( query ) );
-    var expected = require('../fixture/search_linguistic_viewport');
-
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
-    t.deepEqual(compiled.body, expected, 'search_linguistic_viewport');
-    t.end();
-  });
-
-  // viewport scale sizing currently disabled.
-  // ref: https://github.com/pelias/api/pull/388
-  test('search with viewport diagonal < 1km should set scale to 1km', function(t) {
-    var clean = {
-      parsed_text: {
-        street: 'street value'
-      },
-      text: 'test', querySize: 10,
-      'focus.viewport.min_lat': 28.49135,
-      'focus.viewport.max_lat': 28.49137,
-      'focus.viewport.min_lon': -87.50622,
-      'focus.viewport.max_lon': -87.50624,
-      layers: ['test']
-    };
-
-    var query = generate(clean);
-
-    var compiled = JSON.parse( JSON.stringify( query ) );
-    var expected = require('../fixture/search_linguistic_viewport_min_diagonal');
-
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
-    t.deepEqual(compiled.body, expected, 'valid search query');
     t.end();
   });
 
@@ -161,7 +113,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_linguistic_focus_null_island');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search_linguistic_focus_null_island');
     t.end();
   });
@@ -188,7 +140,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse(JSON.stringify(query));
     var expected = require('../fixture/search_fallback');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'fallbackQuery');
     t.end();
 
@@ -227,7 +179,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_boundary_country');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search: valid boundary.country query');
     t.end();
   });
@@ -246,7 +198,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_with_source_filtering');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search: valid search query with source filtering');
     t.end();
   });
@@ -265,7 +217,7 @@ module.exports.tests.query = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_with_category_filtering');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'valid search query with category filtering');
     t.end();
   });
@@ -615,8 +567,30 @@ module.exports.tests.city_country = function(test, common) {
     var compiled = JSON.parse( JSON.stringify( query ) );
     var expected = require('../fixture/search_fallback_postalcode_only');
 
-    t.deepEqual(compiled.type, 'fallback', 'query type set');
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
     t.deepEqual(compiled.body, expected, 'search_fallback_postalcode_only');
+    t.end();
+  });
+
+};
+
+module.exports.tests.boundary_gid = function(test, common) {
+  test('valid boundary.gid filter', function(t) {
+    var clean = {
+      parsed_text: {
+        street: 'street value'
+      },
+      'text': 'test',
+      'boundary.gid': '123'
+    };
+
+    var query = generate(clean);
+
+    var compiled = JSON.parse( JSON.stringify( query ) );
+    var expected = require('../fixture/search_boundary_gid');
+
+    t.deepEqual(compiled.type, 'search_fallback', 'query type set');
+    t.deepEqual(compiled.body, expected, 'search: valid boundary.gid filter');
     t.end();
   });
 

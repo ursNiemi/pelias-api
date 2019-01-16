@@ -1,6 +1,8 @@
 const logger = require('pelias-logger').get('coarse_reverse');
 const _ = require('lodash');
 const Document = require('pelias-model').Document;
+const Debug = require('../helper/debug');
+const debugLog = new Debug('controller:coarse_reverse');
 
 // do not change order, other functionality depends on most-to-least granular order
 const coarse_granularities = [
@@ -13,7 +15,11 @@ const coarse_granularities = [
   'region',
   'macroregion',
   'dependency',
-  'country'
+  'country',
+  'empire',
+  'continent',
+  'ocean',
+  'marinearea'
 ];
 
 // remove non-coarse layers and return what's left (or all if empty)
@@ -60,40 +66,50 @@ function synthesizeDoc(results) {
   const most_granular_layer = getMostGranularLayerOfResult(_.keys(results));
   const id = results[most_granular_layer][0].id;
 
-  const doc = new Document('whosonfirst', most_granular_layer, id.toString());
-  doc.setName('default', results[most_granular_layer][0].name);
+  try {
+    const doc = new Document('whosonfirst', most_granular_layer, id.toString());
+    doc.setName('default', results[most_granular_layer][0].name);
 
-  // assign the administrative hierarchy
-  _.keys(results).forEach((layer) => {
-    doc.addParent(layer, results[layer][0].name, results[layer][0].id.toString(), results[layer][0].abbr);
-  });
-
-  // set centroid if available
-  if (_.has(results[most_granular_layer][0], 'centroid')) {
-    doc.setCentroid( results[most_granular_layer][0].centroid );
-  }
-
-  // set bounding box if available
-  if (_.has(results[most_granular_layer][0], 'bounding_box')) {
-    const parsed_bounding_box = results[most_granular_layer][0].bounding_box.split(',').map(parseFloat);
-    doc.setBoundingBox({
-      upperLeft: {
-        lat: parsed_bounding_box[3],
-        lon: parsed_bounding_box[0]
-      },
-      lowerRight: {
-        lat: parsed_bounding_box[1],
-        lon: parsed_bounding_box[2]
-      }
+    // assign the administrative hierarchy
+    _.keys(results).forEach((layer) => {
+      doc.addParent(layer, results[layer][0].name, results[layer][0].id.toString(), results[layer][0].abbr || undefined);
     });
 
+    // set centroid if available
+    if (_.has(results[most_granular_layer][0], 'centroid')) {
+      doc.setCentroid( results[most_granular_layer][0].centroid );
+    }
+
+    // set bounding box if available
+    if (_.has(results[most_granular_layer][0], 'bounding_box')) {
+      const parsed_bounding_box = results[most_granular_layer][0].bounding_box.split(',').map(parseFloat);
+      doc.setBoundingBox({
+        upperLeft: {
+          lat: parsed_bounding_box[3],
+          lon: parsed_bounding_box[0]
+        },
+        lowerRight: {
+          lat: parsed_bounding_box[1],
+          lon: parsed_bounding_box[2]
+        }
+      });
+
+    }
+
+    const esDoc = doc.toESDocument();
+    esDoc.data._id = esDoc._id;
+    esDoc.data._type = esDoc._type;
+    return esDoc.data;
+
+  } catch( e ) {
+
+    // an error occurred when generating a new Document
+    logger.info(`[controller:coarse_reverse][error]`);
+    logger.error(e);
+    logger.info(results);
+
+    return null;
   }
-
-  const esDoc = doc.toESDocument();
-  esDoc.data._id = esDoc._id;
-  esDoc.data._type = esDoc._type;
-  return esDoc.data;
-
 }
 
 function setup(service, should_execute) {
@@ -102,7 +118,7 @@ function setup(service, should_execute) {
     if (!should_execute(req, res)) {
       return next();
     }
-
+    const initialTime = debugLog.beginTimer(req);
     // return a warning to the caller that boundary.circle.radius will be ignored
     if (!_.isUndefined(req.clean['boundary.circle.radius'])) {
       req.warnings.push('boundary.circle.radius is not applicable for coarse reverse');
@@ -111,22 +127,27 @@ function setup(service, should_execute) {
     // because coarse reverse is called when non-coarse reverse didn't return
     //  anything, treat requested layers as if it didn't contain non-coarse layers
     const effective_layers = getEffectiveLayers(req.clean.layers);
+    debugLog.push(req, {effective_layers: effective_layers});
 
     const centroid = {
       lat: req.clean['point.lat'],
       lon: req.clean['point.lon']
     };
 
-    service(req, (err, results) => {
+    service(req, (err, results, metadata) => {
       // if there's an error, log it and bail
       if (err) {
-        logger.info(`[controller:coarse_reverse][error]`);
-        logger.error(err);
+        logger.error('error contacting PIP service', err);
         return next();
       }
 
-      // log how many results there were
-      logger.info(`[controller:coarse_reverse][queryType:pip][result_count:${_.size(results)}]`);
+      const logInfo = {
+        controller: 'coarse_reverse',
+        queryType: 'pip',
+        response_time: _.get(metadata, 'response_time'),
+        result_count: _.size(results)
+      };
+      logger.info('pip', logInfo);
 
       // now keep everything from the response that is equal to or less granular
       // than the most granular layer requested.  that is, if effective_layers=['county'],
@@ -138,9 +159,12 @@ function setup(service, should_execute) {
 
       // if there's a result at the requested layer(s), synthesize a doc from results
       if (hasResultsAtRequestedLayers(applicable_results, effective_layers)) {
-        res.data.push(synthesizeDoc(applicable_results));
+        const doc = synthesizeDoc(applicable_results);
+        if (doc){
+          res.data.push(doc);
+        }
       }
-
+      debugLog.stopTimer(req, initialTime);
       return next();
 
     });

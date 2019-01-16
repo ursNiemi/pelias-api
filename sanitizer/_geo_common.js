@@ -2,7 +2,6 @@
  * helper sanitizer methods for geo parameters
  */
 var groups = require('./_groups'),
-    util = require('util'),
     check = require('check-types'),
     wrap = require('./wrap'),
     _ = require('lodash');
@@ -34,10 +33,44 @@ function sanitize_rect( key_prefix, clean, raw, bbox_is_required ) {
   // and not present
   if (!bbox_present) { return; }
 
-  // check each property individually. now that it is known a bbox is present,
-  // all properties must exist, so pass the true flag for coord_is_required
+  sanitize_bbox_min_max(raw, key_prefix);
+  sanitize_bbox_bounds(raw, key_prefix);
+
+  // use sanitize_coord to set values in `clean`
   properties.forEach(function(prop) {
     sanitize_coord(prop, clean, raw, true);
+  });
+}
+
+  // validate max is greater than min for lat and lon
+function sanitize_bbox_min_max(raw, key_prefix) {
+  ['lat', 'lon'].forEach(function(dimension) {
+    const max = parseFloat(raw[`${key_prefix}.max_${dimension}`]);
+    const min = parseFloat(raw[`${key_prefix}.min_${dimension}`]);
+
+    if (max <= min) {
+      throw new Error(`${key_prefix}.min_${dimension} (${min}) must be less than ${key_prefix}.max_${dimension} (${max})`);
+    }
+  });
+}
+
+// validate lat/lon values are within bounds
+function sanitize_bbox_bounds(raw, key_prefix) {
+  const bounds = [ { dimension: 'lat', range: 90},
+                   { dimension: 'lon', range: 180}];
+
+  bounds.forEach(function(bound) {
+    const values = {
+      max: parseFloat(raw[`${key_prefix}.max_${bound.dimension}`]),
+      min: parseFloat(raw[`${key_prefix}.min_${bound.dimension}`])
+    };
+
+    ['min', 'max'].forEach(function(prefix) {
+      if (Math.abs(values[prefix]) > bound.range) {
+        const key =`${key_prefix}.${prefix}_${bound.dimension}`;
+        throw new Error(`${key} value ${values[prefix]} is outside range -${bound.range},${bound.range}`);
+      }
+    });
   });
 }
 
@@ -115,10 +148,9 @@ function sanitize_coord( key, clean, raw, latlon_is_required ) {
     clean[key] = parsedValue;
   }
   else if (latlon_is_required) {
-    throw new Error( util.format( 'missing param \'%s\'', key ) );
+    throw new Error(`missing param '${key}'`);
   }
 }
-
 
 /**
  * Parse and validate 2d point array parameter 'lon lat, lon lat, lon lat , ...'
@@ -147,21 +179,20 @@ function sanitize_point_array( key, clean, raw, is_required ) {
       if ( _.isFinite( fval ) ) {
         return fval;
       } else {
-        throw new Error( util.format( 'Bad float format in boundary polygon \'%s\'', val ) );
+        throw new Error( `Bad float format in boundary polygon '${val}'`);
       }
     });
     if (p.length === 2) {
       return { lon: p[0], lat: p[1] };
     } else {
-      throw new Error( util.format( 'Bad point format in boundary polygon \'%s\'', lon_lat ) );
+      throw new Error( `Bad point format in boundary polygon '${lon_lat}'`);
     }
   });
   if (points.length < 3) {
-    throw new Error( util.format( 'Invalid boundary polygon \'%s\'', raw[key] ) );
+    throw new Error( `Invalid boundary polygon '${raw[key]}'`);
   }
   clean[key] = points;
 }
-
 
 module.exports = {
   sanitize_rect: sanitize_rect,
