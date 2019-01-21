@@ -29,6 +29,17 @@
   "api" : {
     "indexName": "pelias",
     "version": "1.0",
+    "targets": {
+      "canonical_sources": ["whosonfirst", "openstreetmap", "openaddresses", "geonames", "nlsfi", "gtfs"],
+      "layers_by_source": {
+        "nlsfi": [ "venue", "stop", "station" ],
+        "gtfs": [ "stop", "station" ]
+      },
+      "source_aliases": {
+        "gtfs": ["gtfs"],
+        "nlsfi": ["nlsfi"]
+      }
+    },
     "textAnalyzer": "libpostal",
     "sizePadding": 10,
     "minConfidence": 0.2,
