@@ -89,8 +89,8 @@ function isPreferred(existingHit, candidateHit) {
     case 'geonames': return candidateHit.source === 'whosonfirst';
     // addresses are generally better in OA
     case 'nlsfi': return candidateHit.source === 'openstreetmap';
-    // addresses are generally better in OA
-    case 'openstreetmap': return candidateHit.source === 'openaddresses';
+    // addresses are generally better in osm
+    case 'openaddresses': return candidateHit.source === 'openstreetmap';
     // venues are better in OSM
     case 'whosonfirst': return candidateHit.source === 'openstreetmap';
     // no preference, keep existing hit
