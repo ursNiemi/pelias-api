@@ -301,7 +301,7 @@ function checkLanguageNames(text, doc, stripNumbers, tryGenitive) {
       if (tryGenitive && score > genitiveThreshold && // don't prefix unless base match is OK
           text.length > 2 + name.length ) { // Shortest admin prefix is 'ii '
         // prefix with parent admins to catch cases like 'kontulan r-kioski'
-        var parent = doc.parent;
+        var parent = doc.parent || {};
         for(var key in adminWeights) {
           var admins = parent[key];
           if (Array.isArray(admins)) {
@@ -471,7 +471,15 @@ function checkAdmin(values, hit) {
 
     // loop trough configured properties to find best match
     for(var key in adminWeights) {
-      var prop = (key === 'street' && hit.address_parts) ? hit.address_parts.street : hit.parent[key];
+      var prop;
+      if(key === 'street' && hit.address_parts) {
+        prop = hit.address_parts.street;
+      }
+      else if (hit.parent) {
+        prop = hit.parent[key];
+      } else {
+        prop = null;
+      }
       if (prop) {
         var match;
         if ( Array.isArray(prop) ) {
