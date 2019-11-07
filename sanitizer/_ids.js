@@ -1,3 +1,4 @@
+const logger = require('pelias-logger').get('api');
 var _ = require('lodash'),
     check = require('check-types'),
     type_mapping = require('../helper/type_mapping');
@@ -25,7 +26,12 @@ function sanitizeId(rawId, messages) {
     return;
   }
 
+  logger.info('****place rawid=' + rawId);
+
   var source = parts[0];
+  if(source.indexOf('gtfs') === 0) {
+    source = 'gtfs';
+  }
   var layer = parts[1];
   var id = parts.slice(2).join(ID_DELIM);
 
@@ -46,7 +52,7 @@ function sanitizeId(rawId, messages) {
   }
 
   return {
-    source: type_mapping.source_mapping[source][0],
+    source: source === 'gtfs' ? parts[0] : type_mapping.source_mapping[source][0],
     layer: layer,
     id: id,
   };
