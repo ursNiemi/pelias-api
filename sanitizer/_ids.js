@@ -1,4 +1,3 @@
-const logger = require('pelias-logger').get('api');
 var _ = require('lodash'),
     check = require('check-types'),
     type_mapping = require('../helper/type_mapping');
@@ -25,8 +24,6 @@ function sanitizeId(rawId, messages) {
     messages.errors.push( formatError(rawId) );
     return;
   }
-
-  logger.info('****place rawid=' + rawId);
 
   var source = parts[0];
   if(source.indexOf('gtfs') === 0) {
