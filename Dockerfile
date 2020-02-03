@@ -1,4 +1,4 @@
-FROM node:8-jessie
+FROM node:10.18-buster
 
 ENV PORT=8080
 EXPOSE ${PORT}
