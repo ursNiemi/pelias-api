@@ -33,11 +33,11 @@ function setup( apiConfig, esclient ){
     // setup a new operation
     const operation = retry.operation(operationOptions);
 
+    //generate Elasticsearch mget entries based on GID
     const cmd = req.clean.ids.map( function(id) {
       return {
         _index: apiConfig.indexName,
-        _type: id.layer,
-        _id: id.id
+        _id: `${id.source}:${id.layer}:${id.id}`
       };
     });
 
