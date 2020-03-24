@@ -14,22 +14,12 @@ module.exports = function( vs ){
     return null;
   }
 
-  var view = peliasQuery.view.ngrams( vs );
+  vs.var('match_phrase:ngrams_strict:input', vs.var('input:name').get());
+  vs.var('match_phrase:ngrams_strict:field', vs.var('ngram:field').get());
 
-  if (!view) {
-    return null;
-  }
+  vs.var('match_phrase:ngrams_strict:analyzer', vs.var('ngram:analyzer').get());
+  vs.var('match_phrase:ngrams_strict:slop', vs.var('phrase:slop').get());
+  vs.var('match_phrase:ngrams_strict:boost', vs.var('ngram:boost').get());
 
-  var target;
-  if(vs.isset('ngram:multifield')) {
-    target = view.multi_match;
-  }
-  else {
-    target = view.match[vs.var('ngram:field')];
-  }
-  target.type = 'phrase';
-  target.operator = 'and';
-  target.slop = vs.var('phrase:slop');
-
-  return view;
+  return peliasQuery.view.leaf.match_phrase('ngrams_strict')(vs);
 };
