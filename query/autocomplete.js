@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const peliasQuery = require('pelias-query');
 var defaults = require('./autocomplete_defaults');
-const textParser = require('./text_parser_addressit');
+const textParser = require('./text_parser_pelias');
 const config = require('pelias-config').generate();
 const placeTypes = require('../helper/placeTypes');
 
