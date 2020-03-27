@@ -4,3 +4,5 @@ coverage
 *.log
 reports
 pids
+*~
+yarn.lock
