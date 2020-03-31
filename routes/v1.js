@@ -69,7 +69,8 @@ var postProc = {
   normalizeParentIds: require('../middleware/normalizeParentIds'),
   assignLabels: require('../middleware/label'),
   changeLanguage: require('../middleware/changeLanguage'),
-  sortResponseData: require('../middleware/sortResponseData')
+  sortResponseData: require('../middleware/sortResponseData'),
+  zones: require('../middleware/zones')
 };
 
 // predicates that drive whether controller/search runs
@@ -379,6 +380,7 @@ function addRoutes(app, peliasConfig) {
       postProc.normalizeParentIds(),
       postProc.changeLanguage(changeLanguageService, changeLanguageShouldExecute),
       postProc.assignLabels(),
+      postProc.zones(),
       postProc.geocodeJSON(peliasConfig.api, base),
       postProc.sendJSON
     ]),

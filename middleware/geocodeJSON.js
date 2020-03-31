@@ -76,6 +76,11 @@ function convertToGeocodeJSON(req, res, next, opts) {
   // response envelope
   res.body.geocoding.timestamp = new Date().getTime();
 
+  if (res.zones && res.zones.length) {
+    res.body.zones = res.zones;
+  }
+  res.body.geocoding.timestamp = new Date().getTime();
+
   // convert docs to geojson and merge with geocoding block
   _.extend(res.body, geojsonify(req.clean, res.data || []));
 
