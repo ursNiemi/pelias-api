@@ -4,7 +4,8 @@ function setup(prefix) {
 
   const regions = {
     HSL: require('./config/hsl_zone_areas_20190508.json'),
-    Tampere: require('./config/tre_zone_areas_20191028.json')
+    tampere: require('./config/tre_zone_areas_20191028.json'),
+    LINKKI:  require('./config/linkki.json'),
   };
 
   // precompute bounding boxes to optimize test speed
