@@ -68,7 +68,8 @@
     "stats-lite": "^2.0.4",
     "pelias-text-analyzer": "github:hsldevcom/pelias-text-analyzer",
     "through2": "^3.0.0",
-    "fuzzy.js": "^0.1.0"
+    "fuzzy.js": "^0.1.0",
+    "point-in-polygon": "1.0.1"
   },
   "devDependencies": {
     "ciao": "^2.0.0",
