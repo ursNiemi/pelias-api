@@ -20,7 +20,7 @@ function addParsedVariablesToQueryVariables( clean, vs ){
   // is it a street address?
   var isStreetAddress = clean.parsed_text.hasOwnProperty('number') && clean.parsed_text.hasOwnProperty('street');
   if( isStreetAddress ){
-    vs.var( 'input:name', clean.parsed_text.number + ' ' + clean.parsed_text.street );
+    vs.var( 'input:name', clean.parsed_text.street + ' ' + clean.parsed_text.number );
   }
 
   // ?
