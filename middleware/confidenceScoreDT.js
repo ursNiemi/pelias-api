@@ -107,20 +107,6 @@ function compareResults(a, b) {
   if (b.confidence !== a.confidence) {
     return b.confidence - a.confidence;
   }
-  if(a.layer !== b.layer) { // larger has higher priority
-    return layers.indexOf(b.layer) - layers.indexOf(a.layer);
-  }
-  if(a.source !== b.source) {
-    return sources.indexOf(b.source) - sources.indexOf(a.source);
-  }
-  if (a.popularity || b.popularity) {
-    var apop = a.popularity || 10;
-    var bpop = b.popularity || 10;
-    return bpop - apop;
-  }
-  if (a.distance !== b.distance) {  // focus point defined
-    return a.distance - b.distance;
-  }
   var diff;
   if (a.parent && b.parent) {
     diff = compareProperty(a.parent.localadmin, b.parent.localadmin);
@@ -133,7 +119,6 @@ function compareResults(a, b) {
     if (diff) {
       return diff;
     }
-
     var n1 = parseInt(a.address_parts.number);
     var n2 = parseInt(b.address_parts.number);
     if (!isNaN(n1) && !isNaN(n2)) {
@@ -148,6 +133,22 @@ function compareResults(a, b) {
     if (diff) {
       return diff;
     }
+  }
+  if (a.popularity || b.popularity) {
+    var apop = a.popularity || 10;
+    var bpop = b.popularity || 10;
+    if (apop !== bpop) {
+      return bpop - apop;
+    }
+  }
+  if(a.layer !== b.layer) { // larger has higher priority
+    return layers.indexOf(b.layer) - layers.indexOf(a.layer);
+  }
+  if (a.distance !== b.distance) {  // focus point defined
+    return a.distance - b.distance;
+  }
+  if(a.source !== b.source) {
+    return sources.indexOf(b.source) - sources.indexOf(a.source);
   }
 
   return 0;

@@ -1,0 +1,22 @@
+FROM node:10.18-buster
+
+# This dockerfile creates a base image, which contains all libpostal components.
+# The actual travis build for pelias api does not run error sensitive and
+# time consuming libpostal install, but uses a prebuilt base image created by this script.
+# If libpostal gets updated in the future, run 'docker build --tag hsldevcom/libpostal -f Dockerfile.base .'
+# and push the updated image to hsldevcom docker registry.
+
+# install libpostal
+RUN apt-get update
+RUN echo 'APT::Acquire::Retries "20";' >> /etc/apt/apt.conf
+RUN apt-get install -y --no-install-recommends git curl make libsnappy-dev autoconf automake libtool python pkg-config
+
+RUN mkdir -p /mnt/data
+
+RUN git clone --single-branch https://github.com/openvenues/libpostal \
+  && cd libpostal \
+  && ./bootstrap.sh \
+  && ./configure --datadir=/mnt/data \
+  && make -j4 \
+  && make install \
+  && ldconfig

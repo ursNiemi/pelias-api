@@ -1,17 +1,15 @@
-const peliasQuery = require('pelias-query');
-const textParser = require('./text_parser_addressit');
-const check = require('check-types');
-const logger = require('pelias-logger').get('api');
 const _ = require('lodash');
+const peliasQuery = require('pelias-query');
 var defaults = require('./search_defaults');
+const textParser = require('./text_parser_pelias');
 const config = require('pelias-config').generate().api;
+
 var placeTypes = require('../helper/placeTypes');
 var views = { custom_boosts: require('./view/boost_sources_and_layers') };
 
-// region_a is also an admin field. addressit tries to detect
-// region_a, in which case we use a match query specifically for it.
-// but address it doesn't know about all of them so it helps to search
-// against this with the other admin parts as a fallback
+// region_a is also an admin field which can be identified by
+// the pelias_parser. this functionality was inherited from the
+// previous parser we used prior to the creation of pelias_parser.
 var adminFields = placeTypes.concat(['region_a']);
 
 if (config && config.query && config.query.search && config.query.search.defaults) {
@@ -31,7 +29,6 @@ query.score( peliasQuery.view.ngrams, 'must' );
 query.score( peliasQuery.view.phrase );
 query.score( peliasQuery.view.focus( peliasQuery.view.phrase ) );
 query.score( peliasQuery.view.popularity( peliasQuery.view.phrase ) );
-query.score( peliasQuery.view.population( peliasQuery.view.phrase ) );
 
 // address components
 query.score( peliasQuery.view.address('housenumber') );
@@ -39,11 +36,6 @@ query.score( peliasQuery.view.address('street') );
 query.score( peliasQuery.view.address('postcode') );
 
 // admin components
-// country_a and region_a are left as matches here because the text-analyzer
-// can sometimes detect them, in which case a query more specific than a
-// multi_match is appropriate.
-query.score( peliasQuery.view.admin('country_a') );
-query.score( peliasQuery.view.admin('region_a') );
 query.score( peliasQuery.view.admin_multi_match(adminFields, 'peliasAdmin') );
 query.score( views.custom_boosts( config.customBoosts ) );
 
@@ -69,19 +61,20 @@ function generateQuery( clean ){
 
   // input text
   vs.var( 'input:name', clean.text );
+  vs.var( 'match_phrase:main:input', clean.text );
 
   // sources
-  if( check.array(clean.sources) && clean.sources.length ) {
+  if( _.isArray(clean.sources) && !_.isEmpty(clean.sources) ) {
     vs.var( 'sources', clean.sources);
   }
 
   // layers
-  if( check.array(clean.layers) && clean.layers.length ) {
+  if( _.isArray(clean.layers) && !_.isEmpty(clean.layers) ) {
     vs.var( 'layers', clean.layers);
   }
 
   // categories
-  if (clean.categories) {
+  if (clean.categories && !_.isEmpty(clean.categories)) {
     vs.var('input:categories', clean.categories);
   }
 
@@ -91,8 +84,8 @@ function generateQuery( clean ){
   }
 
   // focus point
-  if( check.number(clean['focus.point.lat']) &&
-      check.number(clean['focus.point.lon']) ){
+  if( _.isFinite(clean['focus.point.lat']) &&
+      _.isFinite(clean['focus.point.lon']) ){
     vs.set({
       'focus:point:lat': clean['focus.point.lat'],
       'focus:point:lon': clean['focus.point.lon']
@@ -100,10 +93,10 @@ function generateQuery( clean ){
   }
 
   // boundary rect
-  if( check.number(clean['boundary.rect.min_lat']) &&
-      check.number(clean['boundary.rect.max_lat']) &&
-      check.number(clean['boundary.rect.min_lon']) &&
-      check.number(clean['boundary.rect.max_lon']) ){
+  if( _.isFinite(clean['boundary.rect.min_lat']) &&
+      _.isFinite(clean['boundary.rect.max_lat']) &&
+      _.isFinite(clean['boundary.rect.min_lon']) &&
+      _.isFinite(clean['boundary.rect.max_lon']) ){
     vs.set({
       'boundary:rect:top': clean['boundary.rect.max_lat'],
       'boundary:rect:right': clean['boundary.rect.max_lon'],
@@ -114,14 +107,14 @@ function generateQuery( clean ){
 
   // boundary circle
   // @todo: change these to the correct request variable names
-  if( check.number(clean['boundary.circle.lat']) &&
-      check.number(clean['boundary.circle.lon']) ){
+  if( _.isFinite(clean['boundary.circle.lat']) &&
+      _.isFinite(clean['boundary.circle.lon']) ){
     vs.set({
       'boundary:circle:lat': clean['boundary.circle.lat'],
       'boundary:circle:lon': clean['boundary.circle.lon']
     });
 
-    if( check.number(clean['boundary.circle.radius']) ){
+    if( _.isFinite(clean['boundary.circle.radius']) ){
       vs.set({
         'boundary:circle:radius': Math.round( clean['boundary.circle.radius'] ) + 'km'
       });
@@ -133,14 +126,14 @@ function generateQuery( clean ){
   }
 
   // boundary country
-  if( check.string(clean['boundary.country']) ){
+  if( _.isArray(clean['boundary.country']) && !_.isEmpty(clean['boundary.country']) ){
     vs.set({
-      'boundary:country': clean['boundary.country']
+      'boundary:country': clean['boundary.country'].join(' ')
     });
   }
 
   // boundary gid
-  if ( check.string(clean['boundary.gid']) ){
+  if ( _.isString(clean['boundary.gid']) ){
     vs.set({
       'boundary:gid': clean['boundary.gid']
     });

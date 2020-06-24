@@ -44,6 +44,7 @@ function addLabels(req, res, next) {
     var label = data[current[0]].label.toLowerCase();
     var layer = data[current[0]].layer;
     var len = todo.length;
+
     var j = 0; // current index in todo arr
     for (var i=0; i<len; i++) {
       var val = todo[j];
@@ -51,25 +52,24 @@ function addLabels(req, res, next) {
         if(ignoreLayer || data[val].layer === layer) {
           current.push(val);
           todo.splice(j, 1);
+        } else {
+          j++; // move to next index
         }
       } else {
-        j++; // move to next index
+        j++;
       }
     }
-
     for(var exp = 0; exp < nameExpansions.length; exp++) {
       len = current.length;
-       if(len < 2 ) { // single item is unique, nothing to do
+
+      if(len < 2 ) { // single item is unique, nothing to do
         break;
       }
-
       var referenceSet = []; // some expansions might wish to know other items
       for(var ri=0; ri<current.length; ri++) {
         referenceSet.push(data[current[ri]]);
       }
-
       var expandedNames = nameExpansions[exp](referenceSet, lang);
-
       // see if that helped - if all still identical, skip the useless expansion
       if (!differentArrayItems(expandedNames)) {
          continue;

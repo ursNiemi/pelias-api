@@ -1,6 +1,6 @@
 {
   "esclient": {
-    "apiVersion": "2.4",
+    "apiVersion": "6.8",
     "keepAlive": true,
     "requestTimeout": "20000",
     "hosts": [
@@ -41,7 +41,7 @@
       }
     },
     "textAnalyzer": "libpostal",
-    "sizePadding": 10,
+    "sizePadding": 12,
     "minConfidence": 0.2,
     "relativeMinConfidence": 0.4,
     "languageMatchThreshold": 0.4,

@@ -17,7 +17,6 @@ const addressit = require('addressit');
 const _      = require('lodash');
 const logger = require('pelias-logger').get('api');
 var check = require('check-types');
-var extend = require('extend');
 var normalize = require('../helper/stringUtils').normalize;
 var api = require('pelias-config').generate().api;
 
